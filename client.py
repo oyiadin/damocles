@@ -58,11 +58,12 @@ def hdl_group_msg(cxt):
     if not cxt['group_id'] in active_groups:
         return
     message = cxt['message'].strip()
+    message_no_CQ = re.sub(R'\[CQ:[^\]]*\]', '', message)  # 排除 CQ 码
 
     if not cxt['user_id'] in whitelist:
         # 关键词ban
         for i in prohibited_words:
-            if i in message:
+            if i in message_no_CQ:
                 return dict(
                     reply=prompts['prohibited_occurred'],
                     ban=True, ban_duration=prohibited_duration*60)
@@ -71,17 +72,17 @@ def hdl_group_msg(cxt):
         for item in auto_reply:
             flag = False
             for i in item[0]:
-                if i in message:
+                if i in message_no_CQ:
                     flag = True
                     break
             if flag:
                 for i in item[1]:
-                    if i in message:
+                    if i in message_no_CQ:
                         return dict(reply=item[2])
 
     at_me = '[CQ:at,qq=%d]' % me
     if at_me in message:
-        return dict(reply=prompts['why_at_me'])
+        return dict(reply=prompts['why_at_me'], at_sender=False)
 
     # 命令执行
     if message == 'ping':
