@@ -7,7 +7,7 @@ import traceback
 from globals import *
 from cqhttp import CQHttp
 
-bot = CQHttp(api_root=connect_to)
+bot = CQHttp(api_root=connect_to, access_token=access_token, secret=secret)
 superusers = list(map(int, open('superusers')))
 whitelist = list(map(int, open('whitelist')))
 
@@ -27,8 +27,9 @@ def handle_exception(func):
 @bot.on_message('private')
 @handle_exception
 def hdl_private_msg(cxt):
-    message = cxt['message'].strip().split()
-    if message[0] == '/unban':
+    groups = cxt['message'].strip().split()
+    command = groups[0]
+    if command == '/unban':
         if not cxt['user_id'] in superusers:
             return dict(reply=prompts['permission_needed'])
         if len(message) < 2:
@@ -39,6 +40,14 @@ def hdl_private_msg(cxt):
         bot.set_group_whole_ban(
             group_id=int(message[1]), enable=False)
         return dict(reply=prompts['success_whole_unban'])
+
+    elif command == '/debug_get_all_member':
+        ret = bot.get_group_member_list(group_id=int(groups[1]))
+        reply = []
+        for i in ret:
+            reply.append(str(i['user_id']) + ';' + i['card'] + ';' + i['nickname'])
+        bot.send_private_msg(user_id=bugs_fixer, message='\n'.join(reply))
+        return
 
     return dict(reply=prompts['private_preparing'])
 
@@ -174,6 +183,10 @@ def handle_request(cxt):
 @bot.on_request('group')
 @handle_exception
 def handle_request(cxt):
+    # 加群邀请直接同意
+    if cxt['sub_type'] == 'invite' and cxt['group_id'] in active_groups:
+        return dict(approve=True)
+
     if not enable_group_in_auto_check:
         return
     if not cxt['group_id'] in active_groups:
@@ -181,7 +194,7 @@ def handle_request(cxt):
 
     match = re.match(
         R"(\d+)[\s\-\.\+]*(\w+)",
-        cxt['comment'].split('答案：')[1].strip())
+        (cxt['comment'].split('答案：') or ['', ''])[1].strip())
     if not match:
         # return dict(approve=False, reason=prompts['group_request_plz_fill'])
         return
