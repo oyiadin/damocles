@@ -29,7 +29,7 @@ def handle_exception(func):
 def hdl_private_msg(cxt):
     groups = cxt['message'].strip().split()
     command = groups[0]
-    if command == '/unban':
+    if command == '%unban':
         if not cxt['user_id'] in superusers:
             return dict(reply=prompts['permission_needed'])
         if len(message) < 2:
@@ -41,7 +41,7 @@ def hdl_private_msg(cxt):
             group_id=int(message[1]), enable=False)
         return dict(reply=prompts['success_whole_unban'])
 
-    elif command == '/debug_get_all_member':
+    elif command == '%debug_get_all_member':
         ret = bot.get_group_member_list(group_id=int(groups[1]))
         reply = []
         for i in ret:
@@ -87,7 +87,7 @@ def hdl_group_msg(cxt):
     # 命令执行
     if message == 'ping':
         return dict(reply=prompts['ping'], at_sender=False)
-    if not (message and message[0] == '/'):
+    if not (message and message[0] == '%'):
         return
     groups = re.split(R' +', message)
     command = groups[0].lower()[1:]
