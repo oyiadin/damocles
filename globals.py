@@ -38,7 +38,7 @@ prompts = dict(
     ping = 'pong!',
     why_at_me = '@我干嘛？',
     prohibited_occurred = '本群禁膜禁女装，给你两分钟冷静冷静~',
-    unknown_command = '未知命令，请重试',
+    unknown_command = '未知命令，请输入%help或%menu查看命令',
     need_more_arguments = '缺少必要参数',
     must_digits_or_CQat = '参数必须是 QQ 号或者一次成功的 @人',
     must_digits = '参数必须是正整数',
@@ -68,7 +68,11 @@ prompts = dict(
                       '/menu /ping',
                       '懒得解释\n',
                       '标*号者需要权限']),
-    welcome_newbie = "Hi，欢迎加入本群~"
+    welcome_newbie = "Hi，欢迎加入本群~",
+    black_house = "你已被永久禁言，麻烦私聊管理员询问具体事项",
+    fmtstr_s = "flag{welcome_to_vidar}烫烫烫烫烫",
+    fmtstr_x = "66",#上文对应666C61677B77656C636F6D655F746F5F76696461727DCCCCCCCCCCCCCCCCCCCC
+    fmtstr_n = "别嘛，再这样我就生气了"
 )
 
 permission_commands = ["ban", "unban", "autocheck", "autokick"]
