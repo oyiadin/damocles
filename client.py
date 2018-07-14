@@ -113,7 +113,10 @@ def hdl_group_msg(cxt):#群成员消息
 
     if command[-1] == 'n':
         result = re.match(r"\d?n")
-        return dict(reply=prompts['fmtstr_n'])
+        if result:
+            return dict(reply=prompts['fmtstr_n'])
+        else:
+            return dict(reply=prompts['unknown_command'])         
 
 
     if command == 'ban' or command == 'unban':
