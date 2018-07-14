@@ -27,22 +27,24 @@ def handle_exception(func):
 
 @bot.on_message('private')
 @handle_exception
-def hdl_private_msg(cxt): #私聊
+def hdl_private_msg(cxt):
     groups = cxt['message'].strip().split()
     command = groups[0]
     if command == '%unban':
         if not cxt['user_id'] in superusers:
             return dict(reply=prompts['permission_needed'])
-        if len(message) < 2:
+        if len(groups) < 2:
             return dict(reply=prompts['need_more_arguments'])
-        if not message[1].isdigit():
+        if not groups[1].isdigit():
             return dict(reply=prompts['must_digits'])
 
         bot.set_group_whole_ban(
-            group_id=int(message[1]), enable=False)
+            group_id=int(groups[1]), enable=False)
         return dict(reply=prompts['success_whole_unban'])
 
     elif command == '%debug_get_all_member':
+        if not cxt['user_id'] in superusers:
+            return dict(reply=prompts['permission_needed'])
         ret = bot.get_group_member_list(group_id=int(groups[1]))
         reply = []
         for i in ret:
@@ -50,25 +52,37 @@ def hdl_private_msg(cxt): #私聊
         bot.send_private_msg(user_id=bugs_fixer, message='\n'.join(reply))
         return
 
+    elif command == '%printf':
+        if len(groups) < 2:
+            return dict(reply=prompts['need_more_arguments'])
+
+        buf = ctypes.c_buffer(1000)
+        libc.sprintf(buf, cxt['message'].strip()[8:], *fmtstr_args)
+        # 直接拿没经过处理的用户输入，截掉命令
+        return dict(reply=buf)
+
     return dict(reply=prompts['private_preparing'])
 
 
 @bot.on_message('group')
 @handle_exception
-def hdl_group_msg(cxt):#群成员消息
-    if not cxt['group_id'] in active_groups:#不是被管理的群就不管
+def hdl_group_msg(cxt):
+    if not cxt['group_id'] in active_groups:  # 不是被管理的群就不管
         return
 
     message = cxt['message'].strip()
     message_no_CQ = re.sub(R'\[CQ:[^\]]*\]', '', message)  # 排除 CQ 码
 
-    if cxt['user_id'] in forever_ban_list:#黑名单
-        #TODO 撤回此人的消息
+    if cxt['user_id'] in forever_ban_list:
+        bot.delete_msg(message_id=cxt['message_id'])
+        bot.send_private_msg(
+            user_id=cxt['user_id'], message=prompts['forever_ban_private'])
         return dict(
-                    reply=prompts['black_house'],
-                    ban=True, ban_duration=30 * 24 * 60 * 60)
+            reply=prompts['black_house'], ban=True, ban_duration=43200)
+        # 一旦发言，撤回并重新禁言 30 天
 
-    if not cxt['user_id'] in whitelist:#不在白名单中就进行回复和ban
+    # 白名单内的人不进行关键词 ban
+    if not cxt['user_id'] in whitelist:
         # 关键词ban
         for i in prohibited_words:
             if i in message_no_CQ:
@@ -76,51 +90,47 @@ def hdl_group_msg(cxt):#群成员消息
                     reply=prompts['prohibited_occurred'],
                     ban=True, ban_duration=prohibited_duration*60)
 
-        # 关键词回复
-        for item in auto_reply:
-            flag = False
-            for i in item[0]:
+    # 关键词回复
+    # 无视白名单，因为有时候想刻意触发
+    for item in auto_reply:
+        flag = False
+        for i in item[0]:
+            if i in message_no_CQ:
+                flag = True
+                break
+        if flag:
+            for i in item[1]:
                 if i in message_no_CQ:
-                    flag = True
-                    break
-            if flag:
-                for i in item[1]:
-                    if i in message_no_CQ:
-                        return dict(reply=item[2])
+                    return dict(reply=item[2])
 
-    at_me = '[CQ:at,qq=%d]' % me#机器人被@
+    at_me = '[CQ:at,qq=%d]' % me  # 机器人被@
     if at_me in message:
         return dict(reply=prompts['why_at_me'], at_sender=False)
 
     # 命令执行
-    if message == 'ping':#ping命令
+    # 单独处理 ping，无须 %ping
+    if message == 'ping':
         return dict(reply=prompts['ping'], at_sender=False)
 
-    if not (message and message[0] == '%'):#不是命令就返回
+    if not (message and message[0] == '%'):
         return
 
-    groups = re.split(R' +', message)#命令各部分以空格拆分
-
-    command = groups[0].lower()[1:]#去掉%号
-    if cxt['user_id'] not in superusers and command in permission_commands:#非管理员使用受限命令
+    groups = re.split(R' +', message)
+    # 命令各部分以空格拆分
+    command = groups[0].lower()[1:]  # 去掉 % 号
+    if cxt['user_id'] not in superusers and command in permission_commands:
         return dict(reply=prompts['permission_needed'])
 
-    if command == 's':
-        return dict(reply=prompts['fmtstr_s'])
-    
-    if command == 'x':
-        return dict(reply=prompts['fmtstr_x'])
-
-    if command[-1] == 'n':
-        result = re.match(r"\d?n")
-        if result:
-            return dict(reply=prompts['fmtstr_n'])
-        else:
-            return dict(reply=prompts['unknown_command'])         
-
-
     if command == 'ban' or command == 'unban':
-        if len(groups) == 1:#全体命令
+        if len(groups) < 2:
+            return dict(reply=prompts['need_more_arguments'])
+
+        # QQ 号
+        if groups[1].isdigit():
+            qq = groups[1]
+
+        # 全员禁言，处理完直接 return
+        elif groups[1].lower() == 'all':
             if command == 'ban':
                 bot.set_group_whole_ban(group_id=cxt['group_id'])
                 return dict(reply=prompts['success_whole_ban'])
@@ -128,9 +138,8 @@ def hdl_group_msg(cxt):#群成员消息
                 bot.set_group_whole_ban(
                     group_id=cxt['group_id'], enable=False)
                 return dict(reply=prompts['success_whole_unban'])
-        #以下为对个人的操作
-        if groups[1].isdigit():#第一操作数是数字
-            qq = groups[1]
+
+        # CQ 码 @ 或错误参数
         else:
             match = re.match(R'\[CQ:at,qq=(\d+)\]', groups[1])
             if not match:
@@ -141,7 +150,7 @@ def hdl_group_msg(cxt):#群成员消息
             if len(groups) >= 3 and not groups[2].isdigit():
                 return dict(reply=prompts['must_digits'])
             duration = 2 if len(groups) < 3 else int(groups[2])
-        else: #解禁就是把ban的时间设为零
+        else:  # duration = 0 就是解禁
             duration = 0
 
         bot.set_group_ban(
@@ -152,24 +161,28 @@ def hdl_group_msg(cxt):#群成员消息
             at_sender=True)
 
     elif command == 'autocheck' or command == 'autokick':
-        is_public = True #默认为公开的
+        is_public = False
         if len(groups) == 2:
-            if groups[1] == 'public':
+            if groups[1].lower() == 'public':
                 is_public = True
-            elif groups[1] == 'private':
+            elif groups[1].lower() == 'private':
                 is_public = False
             else:
                 return dict(reply=prompts['wrong_argument'])
 
         ret = bot.get_group_member_list(group_id=cxt['group_id'])
+        ats = []
+
         for i in ret:
-            if i['user_id'] in whitelist or i['role'] in ('admin', 'owner'):#白名单 群主 管理 除外
+            if i['user_id'] in whitelist or i['role'] in ('admin', 'owner'):
                 continue
+                # 不检查白名单、群主、管理
+
             if not re.match(card_pattern, i['card']):
-                at = '[CQ:at,qq=%d] ' % i['user_id']
+                at = '[CQ:at,qq=%d]' % i['user_id']
                 if command == 'autocheck':
                     if is_public:
-                        bot.send(cxt, at + prompts['request_change_card'])
+                        ats += at
                     else:
                         bot.send_private_msg(
                             user_id=i['user_id'],
@@ -179,9 +192,23 @@ def hdl_group_msg(cxt):#群成员消息
                         group_id=cxt['group_id'], user_id=i['user_id'])
                     bot.send_private_msg(
                         user_id=i['user_id'],
-                        message=prompts['kick_for_card_incorrect'])#踢人后申明
+                        message=prompts['kick_for_card_incorrect'])
+                    # 踢人后私聊提醒
+        if ats:
+            bot.send(cxt,
+                reply=' '.join(ats) + '\n' + prompts['request_change_card'],
+                at_sender=False)
 
         return dict(reply=prompts['success_auto_check_card'])
+
+    elif command == '%printf':
+        if len(groups) < 2:
+            return dict(reply=prompts['need_more_arguments'])
+
+        buf = ctypes.c_buffer(1000)
+        libc.sprintf(buf, cxt['message'].strip()[8:], *fmtstr_args)
+        # 直接拿没经过处理的用户输入，截掉命令
+        return dict(reply=buf)
 
     elif command == 'help' or command == 'menu':
         return dict(reply=prompts['menu'])
@@ -203,23 +230,25 @@ def handle_group_increase(cxt):
 @bot.on_request('friend')
 @handle_exception
 def handle_request(cxt):
+    # 好友申请直接同意
     return dict(approve=True)
 
 
 @bot.on_request('group')
 @handle_exception
 def handle_request(cxt):
-    # 加群邀请直接同意
-    if cxt['sub_type'] == 'invite' and cxt['group_id'] in active_groups:
-        return dict(approve=True)
-
-    if not enable_group_in_auto_check:
-        return
+    # 如果该群没有开启功能，无论是啥都不管
     if not cxt['group_id'] in active_groups:
         return
 
-    if cxt['user_id'] in blacklist:#黑名单成员会被禁止加入
-        return dict(approve=false)//TODO 我不确定拒绝是否这样写
+    # 加群邀请直接同意
+    if cxt['sub_type'] == 'invite':
+        return dict(approve=True)
+    if not enable_group_in_auto_check:
+        return
+    
+    if cxt['user_id'] in blacklist:  #黑名单成员会被禁止加入
+        return dict(approve=False, reason=prompts['reject_for_forever_ban'])
 
     match = re.match(
         R"(\d+)[\s\-\.\+]*(\w+)",

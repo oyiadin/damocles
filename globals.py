@@ -36,7 +36,7 @@ prohibited_duration = 2
 
 prompts = dict(
     ping = 'pong!',
-    why_at_me = '@我干嘛？',
+    why_at_me = '干嘛？',
     prohibited_occurred = '本群禁膜禁女装，给你两分钟冷静冷静~',
     unknown_command = '未知命令，请输入%help或%menu查看命令',
     need_more_arguments = '缺少必要参数',
@@ -50,29 +50,28 @@ prompts = dict(
     kick_for_card_incorrect = '由于你的群名片不符合规范，你已被移出群\n'
                               '因为群昵称更新的频率很低，误判也不是不可能\n'
                               '如果因此对你进行了误操作，十分抱歉，重新加群即可~',
+    forever_ban_private = "你已被永久禁言，如有异议，请私戳管理员",
+    reject_for_forever_ban = "不好意思，你正处在本群黑名单中",
     success_ban = '禁言成功，[CQ:at,qq={to}] 将被禁言 {duration} 分钟',
     success_whole_ban = '已开启全员禁言，有权限的人可私聊回复 /unban 群号 解除全员禁言',
     success_unban = '解禁成功，对 [CQ:at,qq={to}] 的禁言已被撤销',
     success_whole_unban = '全员禁言已关闭',
+    
     success_auto_check_card = '群名片检查完毕',
     private_preparing = '私聊模块还没想好写什么功能',
     menu = '\n'.join(['支持以下命令',
-                      '/ban* [QQ/@] [分钟]',
-                      '禁言，默认2min，省略QQ则全员禁言',
-                      '/unban* [QQ/@]',
-                      '解除禁言，省略QQ则关闭全员禁言',
-                      '/autocheck* [to] 与 /autokick*',
+                      '%ban* [QQ/@/all] [分钟]',
+                      '禁言，默认2min，all代表全员禁言',
+                      '%unban* [QQ/@/all]',
+                      '解除禁言，all代表关闭全员禁言',
+                      '%autocheck* [to] 与 %autokick*',
                       '检测群名片规范与否，前者@人提醒，后者直接踢人',
                       '慎用，因为群名片很久才会更新一次',
-                      'to参数可填public或private，即群里或私聊提醒，默认群里',
-                      '/menu /ping',
+                      'to参数可填public或private，即群里或私聊提醒，默认私聊',
+                      '%menu %ping',
                       '懒得解释\n',
                       '标*号者需要权限']),
     welcome_newbie = "Hi，欢迎加入本群~",
-    black_house = "你已被永久禁言，麻烦私聊管理员询问具体事项",
-    fmtstr_s = "flag{welcome_to_vidar}烫烫烫烫烫",
-    fmtstr_x = "66",#上文对应666C61677B77656C636F6D655F746F5F76696461727DCCCCCCCCCCCCCCCCCCCC
-    fmtstr_n = "别嘛，再这样我就生气了"
 )
 
 permission_commands = ["ban", "unban", "autocheck", "autokick"]
