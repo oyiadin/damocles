@@ -2,7 +2,7 @@
 
 # superusers: 有权限执行所有命令的 QQ 号
 # whitelist: 不对列表中的人进行关键词禁言、关键词回复、以及群名片检测
-
+# 
 host = '0.0.0.0'
 port = 8080
 connect_to = 'http://127.0.0.1:5700/'

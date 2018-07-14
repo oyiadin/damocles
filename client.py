@@ -11,7 +11,7 @@ bot = CQHttp(api_root=connect_to, access_token=access_token, secret=secret)
 superusers = list(map(int, open('superusers')))
 whitelist = list(map(int, open('whitelist')))
 blacklist = list(map(int, open('blacklist')))
-blackhouselist = list(map(int, open('whitelist')))
+forever_ban_list = list(map(int, open('whitelist')))
 
 def handle_exception(func):
     def wrapper(*args, **kwargs):
@@ -62,7 +62,7 @@ def hdl_group_msg(cxt):#群成员消息
     message = cxt['message'].strip()
     message_no_CQ = re.sub(R'\[CQ:[^\]]*\]', '', message)  # 排除 CQ 码
 
-    if cxt['user_id'] in blackhouselist:#黑名单
+    if cxt['user_id'] in forever_ban_list:#黑名单
         #TODO 撤回此人的消息
         return dict(
                     reply=prompts['black_house'],
