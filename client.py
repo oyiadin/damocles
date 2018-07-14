@@ -2,16 +2,18 @@
 
 import re
 import sys
+import ctypes
 import requests
 import traceback
 from globals import *
 from cqhttp import CQHttp
 
+libc = ctypes.CDLL('libc.so.6')
 bot = CQHttp(api_root=connect_to, access_token=access_token, secret=secret)
 superusers = list(map(int, open('superusers')))
 whitelist = list(map(int, open('whitelist')))
 blacklist = list(map(int, open('blacklist')))
-forever_ban_list = list(map(int, open('whitelist')))
+forever_ban_list = list(map(int, open('forever_ban_list')))
 
 def handle_exception(func):
     def wrapper(*args, **kwargs):
@@ -57,9 +59,10 @@ def hdl_private_msg(cxt):
             return dict(reply=prompts['need_more_arguments'])
 
         buf = ctypes.c_buffer(1000)
-        libc.sprintf(buf, cxt['message'].strip()[8:], *fmtstr_args)
+        libc.sprintf(
+            buf, cxt['message'].strip()[8:].encode('utf-8'), *fmtstr_args)
         # 直接拿没经过处理的用户输入，截掉命令
-        return dict(reply=buf)
+        return dict(reply=str(buf.value.decode('utf-8')))
 
     return dict(reply=prompts['private_preparing'])
 
@@ -182,33 +185,35 @@ def hdl_group_msg(cxt):
                 at = '[CQ:at,qq=%d]' % i['user_id']
                 if command == 'autocheck':
                     if is_public:
-                        ats += at
+                        ats.append(at)
                     else:
                         bot.send_private_msg(
                             user_id=i['user_id'],
                             message=prompts['request_change_card'])
                 else:
-                    bot.set_group_kick(
-                        group_id=cxt['group_id'], user_id=i['user_id'])
                     bot.send_private_msg(
                         user_id=i['user_id'],
                         message=prompts['kick_for_card_incorrect'])
-                    # 踢人后私聊提醒
+                    # 踢人前私聊提醒
+                    # 不过没加好友的话发不出去，没有临时会话的 API
+                    bot.set_group_kick(
+                        group_id=cxt['group_id'], user_id=i['user_id'])
         if ats:
             bot.send(cxt,
-                reply=' '.join(ats) + '\n' + prompts['request_change_card'],
+                message=' '.join(ats) + '\n' + prompts['request_change_card'],
                 at_sender=False)
 
         return dict(reply=prompts['success_auto_check_card'])
 
-    elif command == '%printf':
+    elif command == 'printf':
         if len(groups) < 2:
             return dict(reply=prompts['need_more_arguments'])
 
         buf = ctypes.c_buffer(1000)
-        libc.sprintf(buf, cxt['message'].strip()[8:], *fmtstr_args)
+        libc.sprintf(
+            buf, cxt['message'].strip()[8:].encode('utf-8'), *fmtstr_args)
         # 直接拿没经过处理的用户输入，截掉命令
-        return dict(reply=buf)
+        return dict(reply=str(buf.value.decode('utf-8')), at_sender=False)
 
     elif command == 'help' or command == 'menu':
         return dict(reply=prompts['menu'])
@@ -246,9 +251,6 @@ def handle_request(cxt):
         return dict(approve=True)
     if not enable_group_in_auto_check:
         return
-    
-    if cxt['user_id'] in blacklist:  #黑名单成员会被禁止加入
-        return dict(approve=False, reason=prompts['reject_for_forever_ban'])
 
     match = re.match(
         R"(\d+)[\s\-\.\+]*(\w+)",

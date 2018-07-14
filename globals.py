@@ -1,8 +1,11 @@
 #coding=utf-8
 
+# 所有私聊消息没加好友的话发不出去，没有临时会话的 API
+
 # superusers: 有权限执行所有命令的 QQ 号
 # whitelist: 不对列表中的人进行关键词禁言、关键词回复、以及群名片检测
-# 
+# forever_ban_list: 一发言就撤回消息并 30 天小黑屋伺候
+
 host = '0.0.0.0'
 port = 8080
 connect_to = 'http://127.0.0.1:5700/'
@@ -34,6 +37,12 @@ auto_reply = [
 prohibited_words = ["女装", "膜"]
 prohibited_duration = 2
 
+fmtstr_args = [
+    b"?",
+    b"wow,彩蛋?",
+    b"76696461727465616d7b77656c636f6d655f746f5f62696e5f776f726c64217d",
+]
+
 prompts = dict(
     ping = 'pong!',
     why_at_me = '干嘛？',
@@ -51,7 +60,6 @@ prompts = dict(
                               '因为群昵称更新的频率很低，误判也不是不可能\n'
                               '如果因此对你进行了误操作，十分抱歉，重新加群即可~',
     forever_ban_private = "你已被永久禁言，如有异议，请私戳管理员",
-    reject_for_forever_ban = "不好意思，你正处在本群黑名单中",
     success_ban = '禁言成功，[CQ:at,qq={to}] 将被禁言 {duration} 分钟',
     success_whole_ban = '已开启全员禁言，有权限的人可私聊回复 /unban 群号 解除全员禁言',
     success_unban = '解禁成功，对 [CQ:at,qq={to}] 的禁言已被撤销',
@@ -68,7 +76,7 @@ prompts = dict(
                       '检测群名片规范与否，前者@人提醒，后者直接踢人',
                       '慎用，因为群名片很久才会更新一次',
                       'to参数可填public或private，即群里或私聊提醒，默认私聊',
-                      '%menu %ping',
+                      '%menu %ping %printf',
                       '懒得解释\n',
                       '标*号者需要权限']),
     welcome_newbie = "Hi，欢迎加入本群~",
