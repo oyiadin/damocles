@@ -12,7 +12,6 @@ libc = ctypes.CDLL('libc.so.6')
 bot = CQHttp(api_root=connect_to, access_token=access_token, secret=secret)
 superusers = list(map(int, open('superusers')))
 whitelist = list(map(int, open('whitelist')))
-blacklist = list(map(int, open('blacklist')))
 forever_ban_list = list(map(int, open('forever_ban_list')))
 
 def handle_exception(func):
@@ -55,12 +54,14 @@ def hdl_private_msg(cxt):
         return
 
     elif command == '%printf':
+        remains = cxt['message'].strip()[8:]
         if len(groups) < 2:
             return dict(reply=prompts['need_more_arguments'])
+        if 'n' in remains:
+            return dict(reply='no `n` plz')
 
         buf = ctypes.c_buffer(1000)
-        libc.sprintf(
-            buf, cxt['message'].strip()[8:].encode('utf-8'), *fmtstr_args)
+        libc.sprintf(buf, remains.encode('utf-8'), *fmtstr_args)
         # 直接拿没经过处理的用户输入，截掉命令
         return dict(reply=str(buf.value.decode('utf-8')))
 
@@ -206,12 +207,14 @@ def hdl_group_msg(cxt):
         return dict(reply=prompts['success_auto_check_card'])
 
     elif command == 'printf':
+        remains = cxt['message'].strip()[8:]
         if len(groups) < 2:
             return dict(reply=prompts['need_more_arguments'])
+        if 'n' in remains:
+            return dict(reply='no `n` plz')
 
         buf = ctypes.c_buffer(1000)
-        libc.sprintf(
-            buf, cxt['message'].strip()[8:].encode('utf-8'), *fmtstr_args)
+        libc.sprintf(buf, remains.encode('utf-8'), *fmtstr_args)
         # 直接拿没经过处理的用户输入，截掉命令
         return dict(reply=str(buf.value.decode('utf-8')), at_sender=False)
 
