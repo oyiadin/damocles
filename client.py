@@ -2,13 +2,12 @@
 
 import re
 import sys
-import ctypes
 import requests
 import traceback
+import subprocess
 from globals import *
 from cqhttp import CQHttp
 
-libc = ctypes.CDLL('libc.so.6')
 bot = CQHttp(api_root=connect_to, access_token=access_token, secret=secret)
 superusers = list(map(int, open('superusers')))
 whitelist = list(map(int, open('whitelist')))
@@ -29,9 +28,11 @@ def handle_exception(func):
 @bot.on_message('private')
 @handle_exception
 def hdl_private_msg(cxt):
-    groups = cxt['message'].strip().split()
-    command = groups[0]
-    if command == '%unban':
+    message = cxt['message'].strip()
+    message_no_CQ = re.sub(R'\[CQ:[^\]]*\]', '', message)  # 排除 CQ 码
+    groups = message.split()
+    command = '' if not (groups[0] and groups[0][0] == '%') else groups[0][1:]
+    if command == 'unban':
         if not cxt['user_id'] in superusers:
             return dict(reply=prompts['permission_needed'])
         if len(groups) < 2:
@@ -43,7 +44,7 @@ def hdl_private_msg(cxt):
             group_id=int(groups[1]), enable=False)
         return dict(reply=prompts['success_whole_unban'])
 
-    elif command == '%debug_get_all_member':
+    elif command == 'debug_get_all_member':
         if not cxt['user_id'] in superusers:
             return dict(reply=prompts['permission_needed'])
         ret = bot.get_group_member_list(group_id=int(groups[1]))
@@ -53,17 +54,19 @@ def hdl_private_msg(cxt):
         bot.send_private_msg(user_id=bugs_fixer, message='\n'.join(reply))
         return
 
-    elif command == '%printf':
-        remains = cxt['message'].strip()[8:]
+    elif command == 'printf':
+        remains = message_no_CQ[8:]  # 截掉`%printf `
         if len(groups) < 2:
             return dict(reply=prompts['need_more_arguments'])
-        if 'n' in remains:
-            return dict(reply='no `n` plz')
 
-        buf = ctypes.c_buffer(1000)
-        libc.sprintf(buf, remains.encode('utf-8'), *fmtstr_args)
-        # 直接拿没经过处理的用户输入，截掉命令
-        return dict(reply=str(buf.value.decode('utf-8')))
+        f = subprocess.Popen(
+            './fmtstr', stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        try:
+            ret = f.communicate(remains.encode('utf-8'), timeout=0.8)[0]
+            assert ret
+            return dict(reply=ret.decode('utf-8'))
+        except (subprocess.TimeoutExpired, AssertionError):
+            return dict(reply=prompts['printf_crash'])
 
     return dict(reply=prompts['private_preparing'])
 
@@ -207,16 +210,18 @@ def hdl_group_msg(cxt):
         return dict(reply=prompts['success_auto_check_card'])
 
     elif command == 'printf':
-        remains = cxt['message'].strip()[8:]
+        remains = message_no_CQ[8:]  # 截掉`%printf `
         if len(groups) < 2:
             return dict(reply=prompts['need_more_arguments'])
-        if 'n' in remains:
-            return dict(reply='no `n` plz')
 
-        buf = ctypes.c_buffer(1000)
-        libc.sprintf(buf, remains.encode('utf-8'), *fmtstr_args)
-        # 直接拿没经过处理的用户输入，截掉命令
-        return dict(reply=str(buf.value.decode('utf-8')), at_sender=False)
+        f = subprocess.Popen(
+            './fmtstr', stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        try:
+            ret = f.communicate(remains.encode('utf-8'), timeout=0.8)[0]
+            assert ret
+            return dict(reply=ret.decode('utf-8'), at_sender=False)
+        except (subprocess.TimeoutExpired, AssertionError):
+            return dict(reply=prompts['printf_crash'])
 
     elif command == 'help' or command == 'menu':
         return dict(reply=prompts['menu'])

@@ -37,12 +37,6 @@ auto_reply = [
 prohibited_words = ["女装", "膜"]
 prohibited_duration = 2
 
-fmtstr_args = [
-    b"?",
-    b"wow,彩蛋?",
-    b"76696461727465616d7b77656c636f6d655f746f5f62696e5f776f726c64217d",
-]
-
 prompts = dict(
     ping = 'pong!',
     why_at_me = '干嘛？',
@@ -64,9 +58,9 @@ prompts = dict(
     success_whole_ban = '已开启全员禁言，有权限的人可私聊回复 /unban 群号 解除全员禁言',
     success_unban = '解禁成功，对 [CQ:at,qq={to}] 的禁言已被撤销',
     success_whole_unban = '全员禁言已关闭',
-    
     success_auto_check_card = '群名片检查完毕',
     private_preparing = '私聊模块还没想好写什么功能',
+    printf_crash = '皮，那边好像崩了',
     menu = '\n'.join(['支持以下命令',
                       '%ban* [QQ/@/all] [分钟]',
                       '禁言，默认2min，all代表全员禁言',
