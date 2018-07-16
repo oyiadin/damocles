@@ -59,7 +59,6 @@ prompts = dict(
     success_unban = '解禁成功，对 [CQ:at,qq={to}] 的禁言已被撤销',
     success_whole_unban = '全员禁言已关闭',
     success_auto_check_card = '群名片检查完毕',
-    private_preparing = '私聊模块还没想好写什么功能',
     printf_crash = '皮，那边好像崩了',
     menu = '\n'.join(['支持以下命令',
                       '%ban* [QQ/@/all] [分钟]',
@@ -69,13 +68,13 @@ prompts = dict(
                       '%autocheck* [to] 与 %autokick*',
                       '检测群名片规范与否，前者@人提醒，后者直接踢人',
                       '慎用，因为群名片很久才会更新一次',
-                      'to参数可填public或private，即群里或私聊提醒，默认私聊',
+                      'to参数可填public或private，即群里或私聊提醒，默认群里',
                       '%menu %ping %printf',
                       '懒得解释\n',
                       '标*号者需要权限']),
     welcome_newbie = "Hi，欢迎加入本群~",
 )
 
-permission_commands = ["ban", "unban", "autocheck", "autokick"]
+permission_commands = ["ban", "unban", "autocheck", "autokick", "debug_get_all_member"]
 
 info_check_url = 'http://example.com/api/student/info/{}'
