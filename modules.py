@@ -6,7 +6,6 @@ import sqli
 
 
 @bot.register(public=True)
-@handle_exception
 def forever_ban(cxt):
     if cxt['user_id'] in forever_ban_list:
         bot.delete_msg(message_id=cxt['message_id'])
@@ -18,7 +17,6 @@ def forever_ban(cxt):
 
 
 @bot.register(public=True)
-@handle_exception
 def keyword_ban(cxt):
     # 白名单内的人不进行关键词 ban
     if not cxt['user_id'] in whitelist:
@@ -31,7 +29,6 @@ def keyword_ban(cxt):
 
 
 @bot.register(public=True)
-@handle_exception
 def keyword_autoreply(cxt):
     # 关键词回复
     # 无视白名单，因为有时候想刻意触发
@@ -48,7 +45,6 @@ def keyword_autoreply(cxt):
 
 
 @bot.register(public=True)
-@handle_exception
 def at_me_handler(cxt):
     at_me = '[CQ:at,qq=%d]' % me  # 机器人被@
     if at_me in cxt['message']:
@@ -57,7 +53,6 @@ def at_me_handler(cxt):
 
 @bot.register('ban', public=True)
 @bot.register('unban', public=True)
-@handle_exception
 def cmd_ban_unban_public(cxt):
     groups = cxt['groups']
     command = cxt['command']
@@ -101,7 +96,6 @@ def cmd_ban_unban_public(cxt):
 
 
 @bot.register('unban', private=True)
-@handle_exception
 def cmd_unban_private(cxt):
     groups = cxt['groups']
     if len(groups) < 2:
@@ -116,7 +110,6 @@ def cmd_unban_private(cxt):
 
 @bot.register('autocheck', public=True)
 @bot.register('autokick', public=True)
-@handle_exception
 def cmd_autocheck_autokick(cxt):
     is_public = True
     groups = cxt['groups']
@@ -163,7 +156,6 @@ def cmd_autocheck_autokick(cxt):
 
 
 @bot.register('printf', public=True, private=True)
-@handle_exception
 def cmd_printf(cxt):
     groups = cxt['groups']
     remains = cxt['message_no_CQ'][8:]  # 截掉`%printf `
@@ -181,15 +173,17 @@ def cmd_printf(cxt):
 
 
 @bot.register('bonus', public=True, private=True)
-@handle_exception
 def sqli_handle(cxt):
     groups = cxt['groups']
     if len(groups) < 2:
         return dict(reply=prompts['need_more_arguments'])
     groups.pop(0)
+
     if groups[0] == 'init':
         sqli.init()
     elif groups[0] == 'create':
+        if not groups[1].isdigit():
+            return dict(reply=prompts['must_digits'])
         return sqli.createActivationCode(int(groups[1]))
     elif groups[0] == 'show':
         return sqli.getActivationCode()
@@ -201,19 +195,16 @@ def sqli_handle(cxt):
 
 @bot.register('help', public=True)
 @bot.register('menu', public=True)
-@handle_exception
 def cmd_menu(cxt):
     return dict(reply=prompts['menu'])
 
 
 @bot.register('ping', public=True, private=True)
-@handle_exception
 def cmd_ping(cxt):
     return dict(reply=prompts['ping'], at_sender=False)
 
 
 @bot.register('debug_get_all_member', private=True)
-@handle_exception
 def cmd_debug_get_all_member(cxt):
     groups = cxt['groups']
     ret = bot.get_group_member_list(group_id=int(groups[1]))
