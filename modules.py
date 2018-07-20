@@ -182,20 +182,21 @@ def cmd_printf(cxt):
 
 @bot.register('bonus', public=True, private=True)
 @handle_exception
-def sqli(cxt):
+def sqli_handle(cxt):
     groups = cxt['groups']
-    cmd = cxt['message_no_CQ'].split(' ').pop(0)
-    if cmd[0] == 'init':
-        sqli.init()
-    elif cmd[0] == 'create':
-        if sqli.createActivationCode(cmd[1]):
-            return dict(reply='%s个激活码生成完毕' % cmd[1])
-    elif cmd[0] == 'show':
-        return sqli.getActivationCode()
-    else:
-        return sqli.getBonus(cxt['user_id'], cmd[1])
     if len(groups) < 2:
         return dict(reply=prompts['need_more_arguments'])
+    groups.pop(0)
+    if groups[0] == 'init':
+        sqli.init()
+    elif groups[0] == 'create':
+        return sqli.createActivationCode(int(groups[1]))
+    elif groups[0] == 'show':
+        return sqli.getActivationCode()
+    elif groups[0] == 'help':
+        return dict(reply=prompts['bonus_help'])
+    else:
+        return sqli.getBonus(cxt['user_id'], groups[0])
 
 
 @bot.register('help', public=True)

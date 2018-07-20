@@ -3,9 +3,11 @@ import random
 from globals import *
 import re
 from base import whitelist
-conn = sqlite3.connect("sqli.db")
+
+conn = sqlite3.connect("sqli.db", check_same_thread=False)
 
 
+# 初始化数据库
 def init():
     flag = "flag{Good_job!u_will_get_bonus!}"
     conn.execute("CREATE TABLE IF NOT EXISTS `USER`(USER_ID VARCHAR(11) UNIQUE ,NUMBER INT NOT NULL DEFAULT 0) ")
@@ -25,25 +27,33 @@ def init():
 
 def waf(string):
     string = str(string).upper().replace('DROP', '')  # 单纯的防止频繁删除数据表
-    return re.sub('OR|UNION|SELECT', '', string, 1)
+    # return re.sub('OR|UNION|SELECT', '', string, 1)
+    return string
 
 
-def createActivationCode(numbers):
-    nums = [str(i) for i in range(10)]
-    for i in range(int(numbers)):
-        ActivationCode = ''
-        for n in range(9):
-            ActivationCode += random.choice(nums)
-        conn.execute("INSERT INTO `CODES`(`CODE`) VALUES(%s)" % (ActivationCode))
-    conn.commit()
-    return True
+# 生成激活码
+def createActivationCode(amount):
+    amount_now = conn.execute("SELECT COUNT(`CODE`) FROM `CODES`").fetchone()[0]
+    if amount <= 20 and amount + amount_now <= 100:
+        nums = [str(i) for i in range(10)]
+        for i in range(int(amount)):
+            ActivationCode = ''
+            for n in range(9):
+                ActivationCode += random.choice(nums)
+            conn.execute("INSERT INTO `CODES`(`CODE`) VALUES(%s)" % (ActivationCode))
+        conn.commit()
+        return dict(reply=prompts['bonus_create_code_succeed'] % (amount, amount + amount_now))
+    else:
+        return dict(reply=prompts['bonus_create_code_failed'])
 
 
+# 输出所有激活码
 def getActivationCode():
-    ActivationCodesList = [i[0] for i in  conn.execute("SELECT * FROM `CODES`").fetchall()]
-    return dict(reply=ActivationCodesList)
+    ActivationCodesList = [i[0] for i in conn.execute("SELECT * FROM `CODES`").fetchall()]
+    return dict(reply=' '.join(ActivationCodesList))
 
 
+# 领取Bonus
 def getBonus(qq, ActivationCode):
     ActivationCode = waf(ActivationCode)
     try:
@@ -56,12 +66,10 @@ def getBonus(qq, ActivationCode):
             conn.execute("DELETE FROM `CODES` WHERE `CODE`=%s" % (ActivationCode))
             conn.commit()
             number = conn.execute("SELECT `NUMBER` FROM `USER` WHERE `USER_ID`=%s" % (qq)).fetchone()
-            return dict(reply='恭喜你成功领取一个星球杯! 你当前共有星球杯%s个' % (number))
+            return dict(reply=prompts['bonus_get_bonus_succeed'] % (number))
         else:
-            return dict(reply='错误的激活码或你没有权限领取')
+            return dict(reply=prompts['bonus_get_bonus_failed'])
     except TypeError:
-        return dict(reply='错误的激活码或你没有权限领取')
+        return dict(reply=prompts['bonus_get_bonus_failed'])
     except sqlite3.OperationalError as message:
-        return dict(reply='%s' % message)
-
-
+        return dict(reply=prompts['bonus_sqlite_error'] % message)
