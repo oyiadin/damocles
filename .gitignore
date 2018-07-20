@@ -15,6 +15,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+.idea
 lib64/
 parts/
 sdist/
@@ -102,3 +103,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#test db
+sqli.db

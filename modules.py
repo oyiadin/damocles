@@ -2,6 +2,7 @@ import re
 import subprocess
 from globals import *
 from base import *
+import sqli
 
 
 @bot.register(public=True)
@@ -26,7 +27,7 @@ def keyword_ban(cxt):
             if i in cxt['message_no_CQ']:
                 return dict(
                     reply=prompts['prohibited_occurred'],
-                    ban=True, ban_duration=prohibited_duration*60)
+                    ban=True, ban_duration=prohibited_duration * 60)
 
 
 @bot.register(public=True)
@@ -92,7 +93,7 @@ def cmd_ban_unban_public(cxt):
         duration = 0
 
     bot.set_group_ban(
-        group_id=cxt['group_id'], user_id=qq, duration=60*duration)
+        group_id=cxt['group_id'], user_id=qq, duration=60 * duration)
     return dict(
         reply=prompts['success_%s' % command].format(
             to=qq, duration=duration),
@@ -155,8 +156,8 @@ def cmd_autocheck_autokick(cxt):
                     group_id=cxt['group_id'], user_id=i['user_id'])
     if ats:
         bot.send(cxt,
-            message=' '.join(ats) + '\n' + prompts['request_change_card'],
-            at_sender=False)
+                 message=' '.join(ats) + '\n' + prompts['request_change_card'],
+                 at_sender=False)
 
     return dict(reply=prompts['success_auto_check_card'])
 
@@ -177,6 +178,25 @@ def cmd_printf(cxt):
         return dict(reply=ret.decode('utf-8'), at_sender=False)
     except (subprocess.TimeoutExpired, AssertionError):
         return dict(reply=prompts['printf_crash'])
+
+
+@bot.register('bonus', public=True, private=True)
+@handle_exception
+def sqli_handle(cxt):
+    groups = cxt['groups']
+    if len(groups) < 2:
+        return dict(reply=prompts['need_more_arguments'])
+    groups.pop(0)
+    if groups[0] == 'init':
+        sqli.init()
+    elif groups[0] == 'create':
+        return sqli.createActivationCode(int(groups[1]))
+    elif groups[0] == 'show':
+        return sqli.getActivationCode()
+    elif groups[0] == 'help':
+        return dict(reply=prompts['bonus_help'])
+    else:
+        return sqli.getBonus(cxt['user_id'], groups[0])
 
 
 @bot.register('help', public=True)
