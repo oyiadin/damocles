@@ -38,7 +38,7 @@ def keyword_autoreply(cxt):
 
 @bot.register(public=True)
 def at_me_handler(cxt):
-    at_me = '[CQ:at,qq=%d]' % args.me  # 机器人被@
+    at_me = '[CQ:at,qq=%d]' % cli_args.qq  # 机器人被@
     if at_me in cxt['message']:
         return dict(reply=prompts['why_at_me'], at_sender=False)
 
@@ -203,8 +203,8 @@ def cmd_debug_get_all_member(cxt):
     reply = []
     for i in ret:
         reply.append(str(i['user_id']) + ';' + i['card'] + ';' + i['nickname'])
-    bot.send_private_msg(user_id=args.bugs_fixer, message='\n'.join(reply))
+    bot.send_private_msg(user_id=cli_args.bugs_fixer, message='\n'.join(reply))
 
 
 if __name__ == '__main__':
-    bot.run(host=args.host, port=args.port)
+    bot.run(host=cli_args.host, port=cli_args.port)
