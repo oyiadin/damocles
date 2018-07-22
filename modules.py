@@ -1,8 +1,9 @@
 import re
-import subprocess
-from globals import *
-from base import *
 import sqli
+import subprocess
+from base import *
+from globals import *
+from keywords import check_if_exist, if_any_autoreply
 
 
 @bot.register(public=True)
@@ -20,28 +21,19 @@ def forever_ban(cxt):
 def keyword_ban(cxt):
     # 白名单内的人不进行关键词 ban
     if not cxt['user_id'] in whitelist:
-        # 关键词ban
-        for i in prohibited_words:
-            if i in cxt['message_no_CQ']:
-                return dict(
-                    reply=prompts['prohibited_occurred'],
-                    ban=True, ban_duration=prohibited_duration * 60)
+        reply = if_any_autoreply(cxt['message_no_CQ'])
+        if reply:
+            return dict(
+                reply=reply, ban=True, ban_duration=prohibited_duration * 60)
 
 
 @bot.register(public=True)
 def keyword_autoreply(cxt):
     # 关键词回复
     # 无视白名单，因为有时候想刻意触发
-    for item in auto_reply:
-        flag = False
-        for i in item[0]:
-            if i in cxt['message_no_CQ']:
-                flag = True
-                break
-        if flag:
-            for i in item[1]:
-                if i in cxt['message_no_CQ']:
-                    return dict(reply=item[2])
+    reply = if_any_autoreply(cxt['message_no_CQ'])
+    if reply:
+        return dict(reply=reply)
 
 
 @bot.register(public=True)
