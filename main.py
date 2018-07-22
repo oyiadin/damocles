@@ -20,11 +20,16 @@ def forever_ban(cxt):
 @bot.register(public=True)
 def keyword_ban(cxt):
     # 白名单内的人不进行关键词 ban
+    do_ban_keys = ['dress', 'admire', 'dirty']
     if not cxt['user_id'] in whitelist:
-        reply = if_any_autoreply(cxt['message_no_CQ'])
-        if reply:
-            return dict(
-                reply=reply, ban=True, ban_duration=prohibited_duration * 60)
+        for key in do_ban_keys:
+            reply = check_if_exist(key, cxt['message_no_CQ'])
+            if reply:
+                duration = 60*60*24*2 if key == 'dirty' \
+                    else prohibited_duration*60
+                # 脏话直接禁两天
+                return dict(
+                    reply=reply, ban=True, ban_duration=duration)
 
 
 @bot.register(public=True)

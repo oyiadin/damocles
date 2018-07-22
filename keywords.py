@@ -4,11 +4,10 @@ import random
 chains = {}
 replies = {}
 silence = {}
+do_reply_keys = ['c', 'where']
 
 dress1 = ('有', '给', '去', '穿', '买', '奖')
 dress2 = ('女装', 'rbq')
-admire1 = ('膜', '摸', '%', 'mo')
-admire2 = ('群主', '管理员', '你', '大佬', 'dalao')
 chains['dress'] = (
     (dress1, dress2),   # 穿 女装
 )
@@ -16,13 +15,28 @@ replies['dress'] = ('本群禁女装', '给你两分钟准备好你的女装')
 silence['dress'] = ('禁', '不', '拒绝', '别')
 
 
-admire1 = ('膜', '摸', '%', 'mo')
-admire2 = ('群主', '管理员', '你', '大佬', 'dalao')
+admire1 = ('膜', '摸', 'mo')
+admire2 = ('膜', '摸', 'mo', '%')
+admire3 = ('群主', '管理员', '你', '大佬', 'dalao')
 chains['admire'] = (
-    (admire1, admire2),   # 膜 大佬
+    (admire1,),            # 膜
+    (admire2, admire3),    # 膜 大佬
 )
 replies['admire'] = ('本群禁膜', '给你两分钟冷静冷静')
-silence['admire'] = ('禁', '不', '拒绝', '别')
+silence['admire'] = (
+    '禁', '不', '拒绝', '别', '手机', '键盘', '薄膜', '屏幕', '贴膜', '电',
+    '笔记本'
+)
+
+
+dirty1 = ('cnm', 'fuck', 'f**k', 'porn')
+dirty2 = ('操', '草', 'cao')
+dirty3 = ('泥马', '尼玛', 'nima', '你')
+chains['dirty'] = (
+    (dirty1,),
+    (dirty2, dirty3),
+)
+replies['dirty'] = ('年轻人，文明点', 'Be polite please', '年轻人，冷静两天')
 
 
 c_noun1 = ('c', 'c语言', '编程')
@@ -44,7 +58,7 @@ replies['c'] = (
     '入门还是要以 C 语言为基础，书籍推荐《C Primer Plus》，最好不要看谭浩强、XX 天精通或者从入门到精通系列…另外，想学 ctf 的话推荐一个网站\nhttps://ctf-wiki.github.io/ctf-wiki/',
     '先把 C 语言学好，其他的不着急，推荐使用《C Primer Plus》，想学 ctf 的话推荐一个网站\nhttps://ctf-wiki.github.io/ctf-wiki/',
 )
-silence['c'] = ('不', '拒绝', '别')
+silence['c'] = ('不', '拒绝', '别', 'ngc', 'ch1p', 'chip', 'ckj')
 
 
 where_noun1 = ('协会', '安协', '实验室', 'vidar')
@@ -89,14 +103,16 @@ def check_if_exist(key, msg):
                     break
                     # 如果 item 没找到，直接跳出来，处理下一条链
         else:
-            return True
-            # 如果完整走到头了，说明这条链完整存在，返回 True
-    return False
-    # 如果没有任何一条链能完整走到头，那么返回 False
+            return replies[key] if isinstance(replies[key], str) \
+                else random.choice(replies[key])
+            # 如果完整走到头了，说明这条链完整存在
+    return None
+    # 如果没有任何一条链能完整走到头，说明没有任何一组关键词成立
 
 
 def if_any_autoreply(msg):
-    for key in replies.keys():
+    for key in do_reply_keys:
         if check_if_exist(key, msg):
-            return random.choice(replies[key])
+            return replies[key] if isinstance(replies[key], str) \
+                else random.choice(replies[key])
     return None
