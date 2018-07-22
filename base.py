@@ -19,6 +19,7 @@ parser.add_argument('-q', '--qq', type=int, default=me)
 parser.add_argument('-b', '--bugs_fixer', type=int, default=bugs_fixer)
 parser.add_argument('-g', '--active_groups',
     type=int, nargs='*', default=active_groups)
+parser.add_argument('--no_whitelist', action='store_true')
 cli_args = parser.parse_args()
 
 
@@ -62,7 +63,8 @@ bot = BaseHandler(
     access_token=cli_args.access_token,
     secret=cli_args.secret)
 superusers = list(map(int, open('superusers')))
-whitelist = list(map(int, open('whitelist')))
+whitelist = list(map(int, open('whitelist'))) \
+    if not cli_args.no_whitelist else []
 forever_ban_list = list(map(int, open('forever_ban_list')))
 
 
