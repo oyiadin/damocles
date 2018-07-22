@@ -1,11 +1,24 @@
 #coding=utf-8
-
 import re
 import sys
+import argparse
 import requests
 import traceback
 from globals import *
 from cqhttp import CQHttp
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--host', default=host)
+parser.add_argument('-p', '--port', type=int, default=port)
+parser.add_argument('-c', '--connect_to', default=connect_to)
+parser.add_argument('-t', '--token', default=access_token)
+parser.add_argument('-s', '--secret', default=secret)
+parser.add_argument('-q', '--qq', type=int, default=me)
+parser.add_argument('-b', '--bugs_fixer', type=int, default=bugs_fixer)
+parser.add_argument('-g', '--active_groups',
+    type=int, nargs='*', default=active_groups)
+args = parser.parse_args()
 
 
 def handle_exception(func):
@@ -14,7 +27,7 @@ def handle_exception(func):
             return func(*args, **kwargs)
         except Exception as e:
             bot.send_private_msg(
-                user_id=bugs_fixer,
+                user_id=args.bugs_fixer,
                 message='\n'.join(traceback.format_exception(*sys.exc_info())))
             # raise e
     return wrapper
@@ -43,7 +56,10 @@ class BaseHandler(CQHttp):
         return decorator
 
 
-bot = BaseHandler(api_root=connect_to, access_token=access_token, secret=secret)
+bot = BaseHandler(
+    api_root=args.connect_to,
+    access_token=args.access_token,
+    secret=args.secret)
 superusers = list(map(int, open('superusers')))
 whitelist = list(map(int, open('whitelist')))
 forever_ban_list = list(map(int, open('forever_ban_list')))
@@ -57,7 +73,7 @@ def unknown_command(cxt):
 @handle_exception
 def hdl_msg(cxt):
     is_group = bool(cxt.get('group_id'))
-    if is_group and not cxt['group_id'] in active_groups:  # 不是被管理的群就不管
+    if is_group and not cxt['group_id'] in args.active_groups:  # 不是被管理的群就不管
         return
 
     cxt['message'] = cxt['message'].strip()
@@ -99,7 +115,7 @@ def handle_request(cxt):
 @handle_exception
 def handle_request(cxt):
     # 如果该群没有开启功能，无论是啥都不管
-    if not cxt['group_id'] in active_groups:
+    if not cxt['group_id'] in args.active_groups:
         return
 
     # 加群邀请直接同意
