@@ -55,7 +55,7 @@ replies['dirty'] = ('年轻人，文明点', 'Be polite please', '年轻人，�
 c_noun1 = ('c', 'c语言', '编程')
 c_noun2 = ('黑客', '信息安全', '安全', '信安')
 c_noun3 = ('书', '教材', '资料', '方法')
-c_noun4 = ('我', '当', '做', '成为', '搞')
+c_noun4 = ('当', '做', '成为', '搞')
 c_adv1 = ('怎么', '如何', '怎样', '咋')
 c_verb1 = ('看', '读', '用', '推荐')
 c_verb2 = ('想', '教', '要')
@@ -85,21 +85,27 @@ replies['where'] = (
     '协会的地址有一教北 300b 和一教南 111，如果不是太早或太晚基本都有人在，进去后找个地方坐下来学习就行',
 )
 
+start_from = 0
 
 def _inner_check(item, msg):
+    global start_from
     for i in item:
-        if i in msg:
+        index = msg.find(i, start_from)
+        if index != -1:
+            start_from = index
             return True
     return False
 
 
 def check_if_exist(key, msg):
+    global start_from
     msg = msg.lower()
     for i in silence.get(key, []):
         if i in msg:
             return False
 
     for chain in chains[key]:
+        start_from = 0
         for item in chain:
             if isinstance(item[0], tuple) or isinstance(item[0], list):
                 for i in item:
