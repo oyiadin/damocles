@@ -15,18 +15,31 @@ replies['dress'] = ('本群禁女装', '给你两分钟准备好你的女装')
 silence['dress'] = ('禁', '不', '拒绝', '别')
 
 
-admire1 = ('膜', '摸', 'mo')
+admire1 = ('膜',)
 admire2 = ('膜', '摸', 'mo', '%')
 admire3 = ('群主', '管理员', '你', '大佬', 'dalao')
 chains['admire'] = (
     (admire1,),            # 膜
     (admire2, admire3),    # 膜 大佬
 )
-replies['admire'] = ('本群禁膜', '给你两分钟冷静冷静')
+replies['admire'] = ('本群禁膜', '少膜一些，给你两分钟冷静冷静')
 silence['admire'] = (
     '禁', '不', '拒绝', '别', '手机', '键盘', '薄膜', '屏幕', '贴膜', '电',
-    '笔记本'
+    '笔记本', 'mooc',
 )
+
+
+violation_verb1 = ('卖', '买', '销售', '脱', '拖')
+violation_noun1 = ('农药', '王者', '吃鸡', '游戏')
+violation_noun2 = ('挂', '库', )
+violation_noun3 = ('黑产',)
+chains['violation'] = (
+    (violation_noun3,),                  # 黑产
+    (violation_verb1, violation_noun2),  # 卖 挂
+    (violation_noun1, violation_noun2),  # 吃鸡 挂
+)
+replies['violation'] = ('注意遵纪守法', '好像有点不和谐?我没误判的话,小黑屋警告一下')
+silence['violation'] = ('禁', '不', '拒绝', '别', '违')
 
 
 dirty1 = ('cnm', 'fuck', 'f**k', 'porn')

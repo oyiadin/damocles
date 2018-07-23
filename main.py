@@ -20,7 +20,7 @@ def forever_ban(cxt):
 @bot.register(public=True)
 def keyword_ban(cxt):
     # 白名单内的人不进行关键词 ban
-    do_ban_keys = ['dress', 'admire', 'dirty']
+    do_ban_keys = ['dress', 'admire', 'violation', 'dirty']
     if not cxt['user_id'] in whitelist:
         for key in do_ban_keys:
             reply = check_if_exist(key, cxt['message_no_CQ'])
@@ -145,9 +145,15 @@ def cmd_autocheck_autokick(cxt):
                 bot.set_group_kick(
                     group_id=cxt['group_id'], user_id=i['user_id'])
     if ats:
-        bot.send(cxt,
-                 message=' '.join(ats) + '\n' + prompts['request_change_card'],
+        how_many_groups = len(ats) // 50
+        if len(ats) % 50:
+            how_many_groups += 1
+        import time
+        for i in range(how_many_groups):
+            bot.send(cxt,
+                 message=' '.join(ats[50*i:50*(i+1)]) + '\n' + prompts['request_change_card'],
                  at_sender=False)
+            time.sleep(2)  # 先强行阻塞，有时间再改成子线程
 
     return dict(reply=prompts['success_auto_check_card'])
 
