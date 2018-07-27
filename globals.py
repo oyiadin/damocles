@@ -2,40 +2,13 @@
 
 # 所有私聊消息没加好友的话发不出去，没有临时会话的 API
 
-# superusers: 有权限执行所有命令的 QQ 号
-# whitelist: 不对列表中的人进行关键词禁言、关键词回复、以及群名片检测
-# forever_ban_list: 一发言就撤回消息并 30 天小黑屋伺候
-
-host = '0.0.0.0'
-port = 8080
-connect_to = 'http://127.0.0.1:5700/'
-access_token = ''
-secret = ''
-
-me = 10000
-# 登录号（机器人号）
-bugs_fixer = 10000
-# 会把 traceback 私聊给这个 QQ 号
-active_groups = []
-# 启用的群号列表
-
 enable_group_in_auto_check = True
 # 如果为真，会自动将学号姓名正确的批准加群
-card_pattern = R"\d{2}[\- ]+\w+[\- ]+\w+"
+card_pattern = R"1\d[\- ]+[\u4e00-\u9fa5]+[\- ]+\w+"
 # 群名片 pattern
 
-auto_reply = [
-    [
-        ["key1", "key2"],
-        ["key3", "key4", "key5"],
-        "回复内容"
-    ],
-    # ...
-]
-# 自动回复的检测分为两组关键词，如果两组关键词均至少出现一个，则回复之
-
-prohibited_words = ["女装", "膜"]
 prohibited_duration = 2
+# 关键词 ban 的时间 / min
 
 prompts = dict(
     ping='pong!',
@@ -55,7 +28,7 @@ prompts = dict(
                             '如果因此对你进行了误操作，十分抱歉，重新加群即可~',
     forever_ban_private="你已被永久禁言，如有异议，请私戳管理员",
     success_ban='禁言成功，[CQ:at,qq={to}] 将被禁言 {duration} 分钟',
-    success_whole_ban='已开启全员禁言，有权限的人可私聊回复 /unban 群号 解除全员禁言',
+    success_whole_ban='已开启全员禁言，有权限的人可私聊回复 %unban 群号 解除全员禁言',
     success_unban='解禁成功，对 [CQ:at,qq={to}] 的禁言已被撤销',
     success_whole_unban='全员禁言已关闭',
     success_auto_check_card='群名片检查完毕',
@@ -81,12 +54,18 @@ prompts = dict(
                     '检测群名片规范与否，前者@人提醒，后者直接踢人',
                     '慎用，因为群名片很久才会更新一次',
                     'to参数可填public或private，即群里或私聊提醒，默认群里',
-                    '%menu %ping %printf',
+                    '%menu %ping %printf %bonus',
                     '懒得解释\n',
                     '标*号者需要权限']),
-    welcome_newbie="Hi，欢迎加入本群~",
+    welcome_newbie = "Hi，欢迎加入 Vidar-Team 2018 新生群 XD\n\n"
+                     "请先阅读以下事项：\n\n"
+                     "* 协会官网: https://vidar.club\n"
+                     "* wiki：https://wiki.vidar.club/doku.php\n"
+                     "* drops：https://drops.vidar.club/\n\n"
+                     "* 为了让大家更好的相互了解，请先更改一下群名片，备注格式为18-专业-姓名\n"
+                     "* 如有任何疑问，请在群里艾特管理员提问",
 )
 
 permission_commands = ["ban", "unban", "autocheck", "autokick", "debug_get_all_member"]
 
-info_check_url = 'http://example.com/api/student/info/{}'
+info_check_url = 'http://hdu.sunnysport.org.cn/api/student/info/{}'

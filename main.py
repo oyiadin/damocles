@@ -1,12 +1,13 @@
 import re
+import sqli
 import subprocess
-from globals import *
 from base import *
 import sqli
+from globals import *
+from keywords import check_if_exist, if_any_autoreply
 
 
 @bot.register(public=True)
-@handle_exception
 def forever_ban(cxt):
     if cxt['user_id'] in forever_ban_list:
         bot.delete_msg(message_id=cxt['message_id'])
@@ -18,46 +19,38 @@ def forever_ban(cxt):
 
 
 @bot.register(public=True)
-@handle_exception
 def keyword_ban(cxt):
     # 白名单内的人不进行关键词 ban
+    do_ban_keys = ['dress', 'admire', 'violation', 'dirty']
     if not cxt['user_id'] in whitelist:
-        # 关键词ban
-        for i in prohibited_words:
-            if i in cxt['message_no_CQ']:
+        for key in do_ban_keys:
+            reply = check_if_exist(key, cxt['message_no_CQ'])
+            if reply:
+                duration = 60*60*24*2 if key == 'dirty' \
+                    else prohibited_duration*60
+                # 脏话直接禁两天
                 return dict(
-                    reply=prompts['prohibited_occurred'],
-                    ban=True, ban_duration=prohibited_duration * 60)
+                    reply=reply, ban=True, ban_duration=duration)
 
 
 @bot.register(public=True)
-@handle_exception
 def keyword_autoreply(cxt):
     # 关键词回复
     # 无视白名单，因为有时候想刻意触发
-    for item in auto_reply:
-        flag = False
-        for i in item[0]:
-            if i in cxt['message_no_CQ']:
-                flag = True
-                break
-        if flag:
-            for i in item[1]:
-                if i in cxt['message_no_CQ']:
-                    return dict(reply=item[2])
+    reply = if_any_autoreply(cxt['message_no_CQ'])
+    if reply:
+        return dict(reply=reply)
 
 
 @bot.register(public=True)
-@handle_exception
 def at_me_handler(cxt):
-    at_me = '[CQ:at,qq=%d]' % me  # 机器人被@
+    at_me = '[CQ:at,qq=%d]' % cli_args.qq  # 机器人被@
     if at_me in cxt['message']:
         return dict(reply=prompts['why_at_me'], at_sender=False)
 
 
 @bot.register('ban', public=True)
 @bot.register('unban', public=True)
-@handle_exception
 def cmd_ban_unban_public(cxt):
     groups = cxt['groups']
     command = cxt['command']
@@ -101,7 +94,6 @@ def cmd_ban_unban_public(cxt):
 
 
 @bot.register('unban', private=True)
-@handle_exception
 def cmd_unban_private(cxt):
     groups = cxt['groups']
     if len(groups) < 2:
@@ -116,7 +108,6 @@ def cmd_unban_private(cxt):
 
 @bot.register('autocheck', public=True)
 @bot.register('autokick', public=True)
-@handle_exception
 def cmd_autocheck_autokick(cxt):
     is_public = True
     groups = cxt['groups']
@@ -155,15 +146,20 @@ def cmd_autocheck_autokick(cxt):
                 bot.set_group_kick(
                     group_id=cxt['group_id'], user_id=i['user_id'])
     if ats:
-        bot.send(cxt,
-                 message=' '.join(ats) + '\n' + prompts['request_change_card'],
+        how_many_groups = len(ats) // 50
+        if len(ats) % 50:
+            how_many_groups += 1
+        import time
+        for i in range(how_many_groups):
+            bot.send(cxt,
+                 message=' '.join(ats[50*i:50*(i+1)]) + '\n' + prompts['request_change_card'],
                  at_sender=False)
+            time.sleep(2)  # 先强行阻塞，有时间再改成子线程
 
     return dict(reply=prompts['success_auto_check_card'])
 
 
 @bot.register('printf', public=True, private=True)
-@handle_exception
 def cmd_printf(cxt):
     groups = cxt['groups']
     remains = cxt['message_no_CQ'][8:]  # 截掉`%printf `
@@ -190,6 +186,8 @@ def sqli_handle(cxt):
     if groups[0] == 'init':
         sqli.init()
     elif groups[0] == 'create':
+        if not groups[1].isdigit():
+            return dict(reply=prompts['must_digits'])
         return sqli.createActivationCode(int(groups[1]))
     elif groups[0] == 'show':
         return sqli.getActivationCode()
@@ -201,27 +199,24 @@ def sqli_handle(cxt):
 
 @bot.register('help', public=True)
 @bot.register('menu', public=True)
-@handle_exception
 def cmd_menu(cxt):
     return dict(reply=prompts['menu'])
 
 
 @bot.register('ping', public=True, private=True)
-@handle_exception
 def cmd_ping(cxt):
     return dict(reply=prompts['ping'], at_sender=False)
 
 
 @bot.register('debug_get_all_member', private=True)
-@handle_exception
 def cmd_debug_get_all_member(cxt):
     groups = cxt['groups']
     ret = bot.get_group_member_list(group_id=int(groups[1]))
     reply = []
     for i in ret:
         reply.append(str(i['user_id']) + ';' + i['card'] + ';' + i['nickname'])
-    bot.send_private_msg(user_id=bugs_fixer, message='\n'.join(reply))
+    bot.send_private_msg(user_id=cli_args.bugs_fixer, message='\n'.join(reply))
 
 
 if __name__ == '__main__':
-    bot.run(host=host, port=port)
+    bot.run(host=cli_args.host, port=cli_args.port)

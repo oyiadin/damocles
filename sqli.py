@@ -71,5 +71,5 @@ def getBonus(qq, ActivationCode):
             return dict(reply=prompts['bonus_get_bonus_failed'])
     except TypeError:
         return dict(reply=prompts['bonus_get_bonus_failed'])
-    except sqlite3.OperationalError as message:
+    except (sqlite3.OperationalError, sqlite3.Warning) as message:
         return dict(reply=prompts['bonus_sqlite_error'] % message)
