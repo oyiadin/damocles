@@ -16,3 +16,4 @@ bugs_fixer = 10000
 # 会把 traceback 私聊给这个 QQ 号
 active_groups = (...)
 # 启用的群号列表
+private_ban_group = 10000
