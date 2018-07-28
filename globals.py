@@ -1,10 +1,9 @@
 # coding=utf-8
-
 # 所有私聊消息没加好友的话发不出去，没有临时会话的 API
 
 enable_group_in_auto_check = True
 # 如果为真，会自动将学号姓名正确的批准加群
-card_pattern = R"1\d[\- ]+[\u4e00-\u9fa5]+[\- ]+\w+"
+card_pattern = R"1\d[\-][\u4e00-\u9fa5]+[\-]\w+"
 # 群名片 pattern
 
 prohibited_duration = 2
@@ -22,7 +21,7 @@ prompts = dict(
     permission_needed='你没有执行此命令的权限',
     group_request_plz_fill='必须完整填写你的学号姓名',
     group_request_plz_correct='请正确填写你的学号姓名',
-    request_change_card='你的群名片不符合规范，请修改',
+    request_change_card='你的群名片不符合规范，请按照 年级-专业-姓名 的格式修改，注意用英文连接符。',
     kick_for_card_incorrect='由于你的群名片不符合规范，你已被移出群\n'
                             '因为群昵称更新的频率很低，误判也不是不可能\n'
                             '如果因此对你进行了误操作，十分抱歉，重新加群即可~',
@@ -44,7 +43,7 @@ prompts = dict(
                           'show  用来输出激活码',
                           'help  你现在看到的',
                           '直接加激活码   验证激活码领取星球杯福利'
-    ]),
+                          ]),
     menu='\n'.join(['支持以下命令',
                     '%ban* [QQ/@/all] [分钟]',
                     '禁言，默认2min，all代表全员禁言',
@@ -57,13 +56,13 @@ prompts = dict(
                     '%menu %ping %printf %bonus',
                     '懒得解释\n',
                     '标*号者需要权限']),
-    welcome_newbie = "Hi，欢迎加入 Vidar-Team 2018 新生群 XD\n\n"
-                     "请先阅读以下事项：\n\n"
-                     "* 协会官网: https://vidar.club\n"
-                     "* wiki：https://wiki.vidar.club/doku.php\n"
-                     "* drops：https://drops.vidar.club/\n\n"
-                     "* 为了让大家更好的相互了解，请先更改一下群名片，备注格式为18-专业-姓名\n"
-                     "* 如有任何疑问，请在群里艾特管理员提问",
+    welcome_newbie="Hi，欢迎加入 Vidar-Team 2018 新生群 XD\n\n"
+                   "请先阅读以下事项：\n\n"
+                   "* 协会官网: https://vidar.club\n"
+                   "* wiki：https://wiki.vidar.club/doku.php\n"
+                   "* drops：https://drops.vidar.club/\n\n"
+                   "* 为了让大家更好的相互了解，请先更改一下群名片，备注格式为18-专业-姓名\n"
+                   "* 如有任何疑问，请在群里艾特管理员提问",
 )
 
 permission_commands = ["ban", "unban", "autocheck", "autokick", "debug_get_all_member"]
