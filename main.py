@@ -2,7 +2,6 @@ import re
 import sqli
 import subprocess
 from base import *
-import sqli
 from globals import *
 from keywords import check_if_exist, if_any_autoreply
 
