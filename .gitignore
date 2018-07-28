@@ -106,7 +106,6 @@ venv.bak/
 
 #test db
 sqli.db
-
 superusers
 whitelist
 forever_ban_list

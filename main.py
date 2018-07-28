@@ -25,8 +25,8 @@ def keyword_ban(cxt):
         for key in do_ban_keys:
             reply = check_if_exist(key, cxt['message_no_CQ'])
             if reply:
-                duration = 60*60*24*2 if key == 'dirty' \
-                    else prohibited_duration*60
+                duration = 60 * 60 * 24 * 2 if key == 'dirty' \
+                    else prohibited_duration * 60
                 # 脏话直接禁两天
                 return dict(
                     reply=reply, ban=True, ban_duration=duration)
@@ -92,17 +92,48 @@ def cmd_ban_unban_public(cxt):
         at_sender=True)
 
 
+@bot.register('ban', private=True)
 @bot.register('unban', private=True)
-def cmd_unban_private(cxt):
+def cmd_ban_unban_private(cxt):
     groups = cxt['groups']
+    command = cxt['command']
     if len(groups) < 2:
         return dict(reply=prompts['need_more_arguments'])
-    if not groups[1].isdigit():
-        return dict(reply=prompts['must_digits'])
 
-    bot.set_group_whole_ban(
-        group_id=int(groups[1]), enable=False)
-    return dict(reply=prompts['success_whole_unban'])
+    # QQ 号
+    if groups[1].isdigit():
+        qq = groups[1]
+
+    # 全员禁言，处理完直接 return
+    elif groups[1].lower() == 'all':
+        if command == 'ban':
+            bot.set_group_whole_ban(group_id=private_ban_group)
+            return dict(reply=prompts['success_whole_ban'])
+        else:
+            bot.set_group_whole_ban(
+                group_id=private_ban_group, enable=False)
+            return dict(reply=prompts['success_whole_unban'])
+
+    # CQ 码 @ 或错误参数
+    else:
+        match = re.match(R'\[CQ:at,qq=(\d+)\]', groups[1])
+        if not match:
+            return dict(reply=prompts['must_digits_or_CQat'])
+        qq = int(match.group(1))
+
+    if command == 'ban':
+        if len(groups) >= 3 and not groups[2].isdigit():
+            return dict(reply=prompts['must_digits'])
+        duration = 2 if len(groups) < 3 else int(groups[2])
+    else:  # duration = 0 就是解禁
+        duration = 0
+
+    bot.set_group_ban(
+        group_id=private_ban_group, user_id=qq, duration=60 * duration)
+    return dict(
+        reply=prompts['success_%s' % command].format(
+            to=qq, duration=duration),
+        at_sender=False)
 
 
 @bot.register('autocheck', public=True)
@@ -151,8 +182,8 @@ def cmd_autocheck_autokick(cxt):
         import time
         for i in range(how_many_groups):
             bot.send(cxt,
-                 message=' '.join(ats[50*i:50*(i+1)]) + '\n' + prompts['request_change_card'],
-                 at_sender=False)
+                     message=' '.join(ats[50 * i:50 * (i + 1)]) + '\n' + prompts['request_change_card'],
+                     at_sender=False)
             time.sleep(2)  # 先强行阻塞，有时间再改成子线程
 
     return dict(reply=prompts['success_auto_check_card'])
@@ -176,12 +207,12 @@ def cmd_printf(cxt):
 
 
 @bot.register('bonus', public=True, private=True)
+@handle_exception
 def sqli_handle(cxt):
     groups = cxt['groups']
     if len(groups) < 2:
         return dict(reply=prompts['need_more_arguments'])
     groups.pop(0)
-
     if groups[0] == 'init':
         sqli.init()
     elif groups[0] == 'create':
