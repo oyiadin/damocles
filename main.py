@@ -1,5 +1,6 @@
 import re
 import sqli
+import gal
 import subprocess
 from base import *
 from globals import *
@@ -227,6 +228,16 @@ def sqli_handle(cxt):
         return sqli.getBonus(cxt['user_id'], groups[0])
 
 
+@bot.register('gal', public=True, private=True)
+def galstart_handle(cxt):
+    gal.startgame(cxt)
+
+@bot.register(None, public=True, private=True)
+def galplay_handle(cxt):
+    gal.makechoice(cxt)
+
+
+
 @bot.register('help', public=True)
 @bot.register('menu', public=True)
 def cmd_menu(cxt):
@@ -249,4 +260,5 @@ def cmd_debug_get_all_member(cxt):
 
 
 if __name__ == '__main__':
+    gal.scn_init()
     bot.run(host=cli_args.host, port=cli_args.port)
