@@ -63,7 +63,9 @@ prompts = dict(
                     '检测群名片规范与否，前者@人提醒，后者直接踢人',
                     '慎用，因为群名片很久才会更新一次',
                     'to参数可填public或private，即群里或私聊提醒，默认群里',
-                    '%menu %ping %printf %bonus',
+                    '%bonus %gal',
+                    '详见对应的help选项',
+                    '%menu %ping %printf',
                     '懒得解释\n',
                     '标*号者需要权限']),
     welcome_newbie="Hi，欢迎加入 Vidar-Team 2018 新生群 XD\n\n"
