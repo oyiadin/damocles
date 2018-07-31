@@ -208,7 +208,6 @@ def cmd_printf(cxt):
 
 
 @bot.register('bonus', public=True, private=True)
-@handle_exception
 def sqli_handle(cxt):
     groups = cxt['groups']
     if len(groups) < 2:

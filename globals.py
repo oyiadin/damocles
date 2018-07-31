@@ -3,7 +3,7 @@
 
 enable_group_in_auto_check = True
 # 如果为真，会自动将学号姓名正确的批准加群
-card_pattern = R"1\d[\-][\u4e00-\u9fa5]+[\-]\w+"
+card_pattern = R"\d{2}[\-－ ]*[\u4e00-\u9fa5]+.*"
 # 群名片 pattern
 
 prohibited_duration = 2

@@ -88,7 +88,7 @@ def hdl_msg(cxt):
         if ret:
             return ret
 
-    if not (cxt['message'] and cxt['message'][0] == '%'):
+    if not (cxt['message'] and cxt['message'][0] in ('%', '％')):
         return
     cxt['groups'] = re.split(R' +', cxt['message'])  # 命令各部分以空格拆分
     cxt['command'] = cxt['groups'][0].lower()[1:]    # 去掉 % 号
