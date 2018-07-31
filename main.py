@@ -230,11 +230,12 @@ def sqli_handle(cxt):
 
 @bot.register('gal', public=True, private=True)
 def galstart_handle(cxt):
-    gal.startgame(cxt)
+    return gal.startgame(cxt)
+
 
 @bot.register(None, public=True, private=True)
 def galplay_handle(cxt):
-    gal.makechoice(cxt)
+    return gal.makechoice(cxt)
 
 
 
