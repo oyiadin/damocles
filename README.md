@@ -46,7 +46,7 @@ def your_func_name(cxt):
 如果想与 HTTP API 进行联络且不中断对该消息的进一步处理，请使用 `bot.send` 或 `bot.xxx`，其中，xxx 直接对应着[这里](https://cqhttp.cc/docs/4.3/#/API)的 API 路径名。
 
 
-4.**gal文本格式说明**
+4. **gal文本格式说明**
 
 ```
 [DayN+][N]
