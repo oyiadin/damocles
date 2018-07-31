@@ -48,7 +48,7 @@ def your_func_name(cxt):
 
 4.**gal文本格式说明**
 
-
+`
 [DayN+][N]
 故事前半段[next]
 故事后半段
@@ -61,7 +61,7 @@ def your_func_name(cxt):
 
 Other days......
 [final]
-
+`
 N+为一个正整数，不允许跳过，即要有day3就必须有day2和day1
 
 N为编号，这个是给人看的，写错不会报错，但可能导致跳转关系有问题，原则上必须从0开始递增，每一天的编号都是从0开始，即day1有0号，day2也有0号
