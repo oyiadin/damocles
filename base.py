@@ -78,10 +78,11 @@ def unknown_command(cxt):
 @handle_exception_and_convert_return
 def hdl_msg(cxt):
     is_group = bool(cxt.get('group_id'))
-    if cxt.get('group_id') not in cli_args.active_groups \
-            and cxt.get('group_id') != cli_args.gal:
-        # 不是被管理的群就不管
-        return
+    if is_group:
+        if cxt.get('group_id') not in cli_args.active_groups \
+                and cxt.get('group_id') != cli_args.gal:
+            # 不是被管理的群就不管
+            return
 
     cxt['message'] = cxt['message'].strip()
     cxt['message_no_CQ'] = re.sub(R'\[CQ:[^\]]*\]', '', cxt['message'])

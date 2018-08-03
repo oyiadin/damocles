@@ -1,6 +1,5 @@
 # coding=utf-8
 # 所有私聊消息没加好友的话发不出去，没有临时会话的 API
-from base import cli_args
 
 enable_group_in_auto_check = True
 # 如果为真，会自动将学号姓名正确的批准加群
