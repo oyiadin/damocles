@@ -6,36 +6,12 @@ import random
 from base import *
 from globals import *
 
-'''
-scenario_list[天数][情景][故事和选项]  {选项:[结果,第二天可能出现的情景]}
-以上需要一个生成器来生成
-savedata = {'qq号':[level,可能出现的情景]}
-'''
-
-'''
-scenario_list =
-[
-    [#Day1
-        ('有一天，我和她相遇了',{'亲上去':['被打死',[-1]],'转身离开':['你错过人生中最重要的相遇...',[2]]}),
-        ('薯片姐姐想和你打ctf',{'399一次':['那一夜发生的事情你不愿再提',[0,1]],'转身离开':['薯片姐姐你都不理，乙烷',[-1]]}),
-    ],
-    [#Day2  
-        ('o爷爷想和你打ctf',{'o爷爷！o爷爷！':['o爷爷还没有学习好，并没有成功带飞你',[1,2]],'转身离开':['o爷爷你都不理，乙烷',[-1]]}),
-        ('Aris想和你打ctf',{'辣鸡Aris，滚开':['你做出了明智的选择',[2]],'好啊！':['Aris把你坑死了！',[-1]]}),
-        ('第二天，我又碰到了她',{'抱上去':['又被打死，我为什么说又呢...',[-1]],'转身离开':['嗯，很好，实力单身',[-1]]}),
-    ],
-    [#Day3  
-        ('o爷爷想和你打ctf',{'o爷爷！o爷爷！':['o爷爷把你带飞了',[]],'转身离开':['o爷爷你都不理，乙烷',[1]]}),
-        ('Aris想和你打ctf',{'辣鸡Aris，滚开':['你没有时间拯救自己了，重来吧',[-1]],'好啊！':['Aris把你坑死了！',[-1]]}),
-        ('Aris还想和你打ctf',{'辣鸡Aris，死开啊':['。。。。',[-1]],'原谅我，Aris！':['Aris是菜，但所谓不要得罪作者的真理你终于懂了',[]]}),
-    ],
-]
-'''
 
 scenario_list = []
 savedata = {}
 play_on = {}
 best_player = []
+playing = False
 
 
 def sleep(leng):
@@ -101,17 +77,29 @@ def startgame(cxt):
     global savedata
     global play_on
     global best_player
+    global playing
+
+    if playing == True:
+        return
+    else:
+        playing = True
 
     if len(cxt['groups']) == 2:
         if cxt['groups'][1] == 'help':
+            playing = False
             return dict(reply=prompts['gal_help'])
 
         if cxt['groups'][1] == 'deldata':
-            bot.send(cxt, message=prompts['gal_deleted'])
-            savedata = {}
-            best_player = [0, [0]]
-            with open("./gal.json", 'w', encoding='utf-8') as json_file:
-                json.dump(savedata, json_file, ensure_ascii=False)
+            if cxt['user_id'] in whitelist:
+                bot.send(cxt, message=prompts['gal_deleted'])
+                savedata = {}
+                play_on = {}
+                best_player = [0, [0]]
+                with open("./gal.json", 'w', encoding='utf-8') as json_file:
+                    json.dump(savedata, json_file, ensure_ascii=False)
+            else:
+                bot.send(cxt,message=prompts['permission_needed'])
+            playing = False
             return
 
     # 加载存档
@@ -125,17 +113,20 @@ def startgame(cxt):
         best_player = savedata['0']
     if player in play_on:
         if play_on[player] == -1:
+            playing = False
             return
 
     # 如果没有该玩家的存档则创建一个
     if not player in savedata:
-        if len(savedata) <= 4:
+        if len(savedata) <= 5:
             level = 0
             count = len(scenario_list[level])
             nextL = [i for i in range(0, count)]
             savedata[player] = [level, nextL]
         else:
             bot.send(cxt, message=prompts['gal_too_many_players'])
+            playing = False
+            return
     else:
         level = savedata[player][0]
         nextL = savedata[player][1]
@@ -164,18 +155,27 @@ def startgame(cxt):
         i = i + 1
     bot.send(cxt, message=sel_str[:-1])
     play_on[player] = rdnum
+    playing = False
 
 
 def makechoice(cxt):
     global savedata
     global play_on
     global best_player
+    global playing
+
+    if playing == True:
+        return
+    else:
+        playing = True
 
     player = str(cxt['user_id'])
     # 判断玩家是否正在玩gal，不是则直接返回
     if not player in play_on or not player in savedata:
+        playing = False
         return
     if play_on[player] == -1:
+        playing = False
         return
 
     level = savedata[player][0]
@@ -209,6 +209,7 @@ def makechoice(cxt):
                 bot.send(cxt, message=prompts['gal_new_best'])
             break
     if not isgal:
+        playing = False
         return
 
     # 第二天可能出现的情景
@@ -226,3 +227,4 @@ def makechoice(cxt):
     # 保存数据
     with open("./gal.json", 'w', encoding='utf-8') as json_file:
         json.dump(savedata, json_file, ensure_ascii=False)
+    playing = False
