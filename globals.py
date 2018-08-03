@@ -1,5 +1,6 @@
 # coding=utf-8
 # 所有私聊消息没加好友的话发不出去，没有临时会话的 API
+from base import cli_args
 
 enable_group_in_auto_check = True
 # 如果为真，会自动将学号姓名正确的批准加群
@@ -48,6 +49,7 @@ prompts = dict(
     gal_new_best='最佳玩家记录已刷新，bad end之后的玩家将更新记录到此处',
     gal_restore_best='已将您的进度恢复到最佳玩家的记录状态，具体为Day{}，您可以继续游戏！',
     gal_all_passed='全员通关恭喜！游戏存档已清空，已经可以开始下一轮游戏',
+    gal_not_here='为避免刷屏，请加群{}体验',
     gal_help='\n'.join(['galbot_v0.1——',
                         '欢迎进入大型多人在线Galgame，通称MMOGAL',
                         '使用%gal命令可以开始游戏，进入下一关也请使用这条命令',

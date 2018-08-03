@@ -229,13 +229,16 @@ def sqli_handle(cxt):
 
 @bot.register('gal', public=True, private=True)
 def galstart_handle(cxt):
-    return gal.startgame(cxt)
+    if cxt['group_id'] == cli_args.gal:
+        return gal.startgame(cxt)
+    else:
+        return prompts['gal_not_here'].format(cli_args.gal)
 
 
-@bot.register(None, public=True, private=True)
+@bot.register(public=True, private=True)
 def galplay_handle(cxt):
-    return gal.makechoice(cxt)
-
+    if cxt['group_id'] == cli_args.gal:
+        return gal.makechoice(cxt)
 
 
 @bot.register('help', public=True)
