@@ -6,19 +6,20 @@ enable_group_in_auto_check = True
 card_pattern = R"\d{2}[\-－ ]*[\u4e00-\u9fa5]+.*"
 # 群名片 pattern
 
-prohibited_duration = 2
+prohibited_duration = 10
 # 关键词 ban 的时间 / min
 
 prompts = dict(
     ping='pong!',
     why_at_me='干嘛？',
-    prohibited_occurred='本群禁膜禁女装，给你两分钟冷静冷静~',
     unknown_command='未知命令，请输入%help或%menu查看命令',
     need_more_arguments='缺少必要参数',
     must_digits_or_CQat='参数必须是 QQ 号或者一次成功的 @人',
     must_digits='参数必须是正整数',
     wrong_argument='参数错误',
     permission_needed='你没有执行此命令的权限',
+    code_too_long='代码这么长？贴到 https://paste.ubuntu.com 再发上来',
+    msg_too_long='小伙子你有刷屏嫌疑呐',
     group_request_plz_fill='必须完整填写你的学号姓名',
     group_request_plz_correct='请正确填写你的学号姓名',
     request_change_card='你的群名片不符合规范，请按照 年级-专业-姓名 的格式修改，注意用英文连接符。',

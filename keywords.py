@@ -42,8 +42,8 @@ replies['violation'] = ('注意遵纪守法', '好像有点不和谐?我没误�
 silence['violation'] = ('禁', '不', '拒绝', '别', '违')
 
 
-dirty1 = ('cnm', 'fuck', 'f**k', 'porn')
-dirty2 = ('操', '草', 'cao')
+dirty1 = ('cnm', 'fuck', 'f**k', 'porn', '鸡鸡')
+dirty2 = ('操', '草', 'cao', '艹')
 dirty3 = ('泥马', '尼玛', 'nima', '你')
 chains['dirty'] = (
     (dirty1,),

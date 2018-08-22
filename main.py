@@ -10,12 +10,13 @@ from keywords import check_if_exist, if_any_autoreply
 @bot.register(public=True)
 def forever_ban(cxt):
     if cxt['user_id'] in forever_ban_list:
-        bot.delete_msg(message_id=cxt['message_id'])
+        # bot.delete_msg(message_id=cxt['message_id'])
         bot.send_private_msg(
             user_id=cxt['user_id'], message=prompts['forever_ban_private'])
         return dict(
             reply=prompts['black_house'], ban=True, ban_duration=43200)
         # 一旦发言，撤回并重新禁言 30 天
+        # 酷 Q Air 不支持撤回…
 
 
 @bot.register(public=True)
@@ -31,6 +32,25 @@ def keyword_ban(cxt):
                 # 脏话直接禁两天
                 return dict(
                     reply=reply, ban=True, ban_duration=duration)
+
+
+@bot.register(public=True)
+def ban_if_code(cxt):
+    keys = [
+        '#include', 'main(', 'printf(', 'std::', 'In file included from', 'required from',
+        'return', 'for', 'while'
+    ]
+    if len(cxt['message']) > 150 and cxt['user_id'] not in whitelist:
+        for i in keys:
+            if i in cxt['message']:
+                # bot.delete_msg(message_id=cxt['message_id'])
+                return dict(reply=prompts['code_too_long'], ban=True, ban_duration=60)
+
+
+@bot.register(public=True)
+def ban_if_too_long(cxt):
+    if len(cxt['message']) > 1000 and cxt['user_id'] not in whitelist:
+        return dict(reply=prompts['msg_too_long'], ban=True, ban_duration=120)
 
 
 @bot.register(public=True)
