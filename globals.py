@@ -33,6 +33,7 @@ prompts = dict(
     success_whole_unban='全员禁言已关闭',
     success_auto_check_card='群名片检查完毕',
     printf_crash='皮，那边好像崩了',
+    shellcode_crash='不仅失败了，还把程序跑崩了，真滴过分',
     bonus_create_code_succeed='%s个激活码生成完毕,当前共有激活码%s个',
     bonus_create_code_failed='生成失败，请保证一次生成数量不超过20，且当前激活码总量不超过100',
     bonus_get_bonus_succeed='恭喜你成功领取一个星球杯! 你当前共有星球杯%s个',

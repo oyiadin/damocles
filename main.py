@@ -2,6 +2,7 @@ import re
 import sqli
 import gal
 import subprocess
+import html.parser
 from base import *
 from globals import *
 from keywords import check_if_exist, if_any_autoreply
@@ -228,6 +229,29 @@ def cmd_printf(cxt):
         return dict(reply=ret.decode('utf-8'), at_sender=False)
     except (subprocess.TimeoutExpired, AssertionError):
         return dict(reply=prompts['printf_crash'])
+
+
+@bot.register('shellcode', public=True, private=True)
+def cmd_printf(cxt):
+    groups = cxt['groups']
+    remains = cxt['message_no_CQ'][11:]  # 截掉`%shellcode `
+    remains = html.parser.HTMLParser().unescape(remains)
+    f = subprocess.Popen(
+        ['./playshellcode',str(cxt['user_id'])], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    try:
+        if len(groups) < 2:
+            ret = f.communicate('help'.encode('utf-8'), timeout=2)[0]
+            return dict(reply=ret.decode('utf-8'), at_sender=False)
+        ret = f.communicate(remains.encode('utf-8'), timeout=2)[0]
+        retcode = f.wait()
+        if(retcode < 0):
+            return dict(reply=prompts['shellcode_crash'])
+        elif(retcode == 0):
+            return dict(reply=ret.decode('utf-8'), at_sender=False)
+        assert ret
+        return dict(reply=ret.decode('utf-8'), at_sender=False)
+    except (subprocess.TimeoutExpired, AssertionError):
+        return dict(reply=prompts['shellcode_crash'])
 
 
 @bot.register('bonus', public=True, private=True)
