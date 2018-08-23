@@ -27,9 +27,12 @@ def keyword_ban(cxt):
         for key in do_ban_keys:
             reply = check_if_exist(key, cxt['message_no_CQ'])
             if reply:
-                duration = 60 * 60 * 24 * 2 if key == 'dirty' \
-                    else prohibited_duration * 60
-                # 脏话直接禁两天
+                if key == 'dirty':
+                    duration = 60 * 60 * 24 * 2  # 2d
+                elif key == 'violation':
+                    duration = 60 * 60 * 6  # 6h
+                else:
+                    duration = prohibited_duration * 60
                 return dict(
                     reply=reply, ban=True, ban_duration=duration)
 

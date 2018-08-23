@@ -11,7 +11,7 @@ dress2 = ('女装', 'rbq')
 chains['dress'] = (
     (dress1, dress2),   # 穿 女装
 )
-replies['dress'] = ('本群禁女装', '给你两分钟准备好你的女装')
+replies['dress'] = ('本群禁女装', '给你十分钟准备好你的女装')
 silence['dress'] = ('禁', '不', '拒绝', '别')
 
 
@@ -22,7 +22,7 @@ chains['admire'] = (
     (admire1,),            # 膜
     (admire2, admire3),    # 膜 大佬
 )
-replies['admire'] = ('本群禁膜', '少膜一些，给你两分钟冷静冷静')
+replies['admire'] = ('本群禁膜', '少膜一些，给你十分钟冷静冷静')
 silence['admire'] = (
     '禁', '不', '拒绝', '别', '手机', '键盘', '薄膜', '屏幕', '贴膜', '电',
     '笔记本', 'mooc',
@@ -38,7 +38,7 @@ chains['violation'] = (
     (violation_verb1, violation_noun2),  # 卖 挂
     (violation_noun1, violation_noun2),  # 吃鸡 挂
 )
-replies['violation'] = ('遵纪守法')
+replies['violation'] = ('遵纪守法', '六小时套餐已生效')
 silence['violation'] = ('禁', '不', '拒绝', '别', '违')
 
 
