@@ -66,7 +66,7 @@ prompts = dict(
                     '检测群名片规范与否，前者@人提醒，后者直接踢人',
                     '慎用，因为群名片很久才会更新一次',
                     'to参数可填public或private，即群里或私聊提醒，默认群里',
-                    '%bonus %gal',
+                    '%bonus %gal %shellcode',
                     '详见对应的help选项',
                     '%menu %ping %printf',
                     '懒得解释\n',

@@ -32,7 +32,7 @@ silence['admire'] = (
 violation_verb1 = ('卖', '买', '销售', '脱', '拖')
 violation_noun1 = ('农药', '王者', '吃鸡', '游戏')
 violation_noun2 = ('挂', '库', )
-violation_noun3 = ('黑产', '翻墙', 'shadowsocks', 'ss', 'ssr', '科学上网', 'vpn')
+violation_noun3 = ('黑产', '翻墙', 'shadowsock', 'ssr', '科学上网', 'vpn')
 chains['violation'] = (
     (violation_noun3,),                  # 黑产
     (violation_verb1, violation_noun2),  # 卖 挂
