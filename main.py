@@ -232,24 +232,34 @@ def cmd_printf(cxt):
 
 
 @bot.register('shellcode', public=True, private=True)
-def cmd_printf(cxt):
+def cmd_shellcode(cxt):
     groups = cxt['groups']
-    remains = cxt['message_no_CQ'][11:]  # 截掉`%shellcode `
+    remains = cxt['message_no_CQ'][11:] or 'help'  # 截掉`%shellcode `
     remains = html.parser.HTMLParser().unescape(remains)
+
+    # simple bypass
+    bypass = ['sh', 'cat', 'bin', 'tcp', 'nc']
+    for i in bypass:
+        if i in remains:
+            return 'violation occurred'
+    # ipv4
+    if re.match(r'(\d{1,3}\.){3}\d{1,3}', remains):
+        return 'violation occurred'
+    # 以上两个过滤都是保险起见
+
     f = subprocess.Popen(
-        ['./playshellcode',str(cxt['user_id'])], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        ['./playshellcode', str(cxt['user_id'])], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
     try:
-        if len(groups) < 2:
-            ret = f.communicate('help'.encode('utf-8'), timeout=2)[0]
-            return dict(reply=ret.decode('utf-8'), at_sender=False)
-        ret = f.communicate(remains.encode('utf-8'), timeout=2)[0]
-        retcode = f.wait()
-        if(retcode < 0):
-            return dict(reply=prompts['shellcode_crash'])
-        elif(retcode == 0):
-            return dict(reply=ret.decode('utf-8'), at_sender=False)
+        ret = f.communicate(remains.encode('utf-8')[:0x30], timeout=2)[0].decode('utf-8')
+        print('ret:', ret)
         assert ret
-        return dict(reply=ret.decode('utf-8'), at_sender=False)
+        if not ret.endswith('\x66\x66\x66'):  # magic, 模仿 canary
+            return 'violation occurred'
+        ret = ret[:-3]
+
+        return dict(reply=ret, at_sender=False)
+
     except (subprocess.TimeoutExpired, AssertionError):
         return dict(reply=prompts['shellcode_crash'])
 
