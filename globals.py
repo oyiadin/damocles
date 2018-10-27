@@ -3,11 +3,7 @@
 
 enable_group_in_auto_check = True
 # 如果为真，会自动将学号姓名正确的批准加群
-<<<<<<< HEAD
-card_pattern = R"1\d[\-][\u4e00-\u9fa5]+[\-]\w+"
-=======
 card_pattern = R"\d{2}[\-－ ]*[\u4e00-\u9fa5]+.*"
->>>>>>> upstream/master
 # 群名片 pattern
 
 prohibited_duration = 10
@@ -16,7 +12,6 @@ prohibited_duration = 10
 prompts = dict(
     ping='pong!',
     why_at_me='干嘛？',
-    prohibited_occurred='本群禁膜禁女装，给你两分钟冷静冷静~',
     unknown_command='未知命令，请输入%help或%menu查看命令',
     need_more_arguments='缺少必要参数',
     must_digits_or_CQat='参数必须是 QQ 号或者一次成功的 @人',
@@ -42,17 +37,16 @@ prompts = dict(
     bonus_create_code_succeed='%s个激活码生成完毕,当前共有激活码%s个',
     bonus_create_code_failed='生成失败，请保证一次生成数量不超过20，且当前激活码总量不超过100',
     bonus_get_bonus_succeed='恭喜你成功领取一个星球杯! 你当前共有星球杯%s个',
-    bonus_get_bonus_failed='错误的激活码或你没有权限领取',
+    bonus_get_bonus_failed='错误的激活码',
+    bonus_uninit='该用户未初始化 请先执行 bonus init 命令',
+    bonus_init_succeed='初始化成功',
+    bonus_init_failed='你已经初始化过了',
     bonus_sqlite_error='sqlite Error:%s',
     bonus_help='\n'.join(['bonus 指令用于领取星球杯福利，具体操作如下:',
-                          'init  用来初始化数据库，该指令将会创建用户表和激活码表',
-                          'create + n  用来生成n个激活码，n不大于20，且数据库激活码总量不能大于200',
-                          'show  用来输出激活码',
+                          'init  该指令将会为用户初始化用户表 每个参与的用户都需要先执行此命令',
+                          'create + n  用来生成n个激活码，n不大于20，且数据库激活码总量不能大于200 需要管理员权限',
+                          'show  用来输出激活码 需要管理员权限',
                           'help  你现在看到的',
-<<<<<<< HEAD
-                          '直接加激活码   验证激活码领取星球杯福利'
-                          ]),
-=======
                           '直接加激活码   验证激活码领取星球杯福利']),
     gal_deleted='游戏存档已删除',
     gal_too_many_players='当前游戏人数已达上限，请等待游戏结束',
@@ -66,7 +60,6 @@ prompts = dict(
                         '每个人的游戏进度单独记录，请直接输入选项中的文字进行回答',
                         '现版本只实装了火车游戏(前半段)，请互相配合合理利用信息过关',
                         '您可以使用%gal help再次查看这条帮助']),
->>>>>>> upstream/master
     menu='\n'.join(['支持以下命令',
                     '%ban* [QQ/@/all] [分钟]',
                     '禁言，默认2min，all代表全员禁言',
