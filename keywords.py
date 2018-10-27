@@ -11,7 +11,7 @@ dress2 = ('女装', 'rbq')
 chains['dress'] = (
     (dress1, dress2),   # 穿 女装
 )
-replies['dress'] = ('本群禁女装', '给你两分钟准备好你的女装')
+replies['dress'] = ('本群禁女装', '给你十分钟准备好你的女装')
 silence['dress'] = ('禁', '不', '拒绝', '别')
 
 
@@ -22,7 +22,7 @@ chains['admire'] = (
     (admire1,),            # 膜
     (admire2, admire3),    # 膜 大佬
 )
-replies['admire'] = ('本群禁膜', '少膜一些，给你两分钟冷静冷静')
+replies['admire'] = ('本群禁膜', '少膜一些，给你十分钟冷静冷静')
 silence['admire'] = (
     '禁', '不', '拒绝', '别', '手机', '键盘', '薄膜', '屏幕', '贴膜', '电',
     '笔记本', 'mooc',
@@ -32,18 +32,18 @@ silence['admire'] = (
 violation_verb1 = ('卖', '买', '销售', '脱', '拖')
 violation_noun1 = ('农药', '王者', '吃鸡', '游戏')
 violation_noun2 = ('挂', '库', )
-violation_noun3 = ('黑产',)
+violation_noun3 = ('黑产', '翻墙', 'shadowsock', 'ssr', '科学上网', 'vpn')
 chains['violation'] = (
     (violation_noun3,),                  # 黑产
     (violation_verb1, violation_noun2),  # 卖 挂
     (violation_noun1, violation_noun2),  # 吃鸡 挂
 )
-replies['violation'] = ('注意遵纪守法', '好像有点不和谐?我没误判的话,小黑屋警告一下')
+replies['violation'] = ('遵纪守法', '六小时套餐已生效')
 silence['violation'] = ('禁', '不', '拒绝', '别', '违')
 
 
-dirty1 = ('cnm', 'fuck', 'f**k', 'porn')
-dirty2 = ('操', '草', 'cao')
+dirty1 = ('cnm', 'fuck', 'f**k', 'porn', '鸡鸡')
+dirty2 = ('操', '草', 'cao', '艹')
 dirty3 = ('泥马', '尼玛', 'nima', '你')
 chains['dirty'] = (
     (dirty1,),
@@ -55,7 +55,7 @@ replies['dirty'] = ('年轻人，文明点', 'Be polite please', '年轻人，�
 c_noun1 = ('c', 'c语言', '编程')
 c_noun2 = ('黑客', '信息安全', '安全', '信安')
 c_noun3 = ('书', '教材', '资料', '方法')
-c_noun4 = ('我', '当', '做', '成为', '搞')
+c_noun4 = ('当', '做', '成为', '搞')
 c_adv1 = ('怎么', '如何', '怎样', '咋')
 c_verb1 = ('看', '读', '用', '推荐')
 c_verb2 = ('想', '教', '要')
@@ -85,21 +85,27 @@ replies['where'] = (
     '协会的地址有一教北 300b 和一教南 111，如果不是太早或太晚基本都有人在，进去后找个地方坐下来学习就行',
 )
 
+start_from = 0
 
 def _inner_check(item, msg):
+    global start_from
     for i in item:
-        if i in msg:
+        index = msg.find(i, start_from)
+        if index != -1:
+            start_from = index
             return True
     return False
 
 
 def check_if_exist(key, msg):
+    global start_from
     msg = msg.lower()
     for i in silence.get(key, []):
         if i in msg:
             return False
 
     for chain in chains[key]:
+        start_from = 0
         for item in chain:
             if isinstance(item[0], tuple) or isinstance(item[0], list):
                 for i in item:

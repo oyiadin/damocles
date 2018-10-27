@@ -1,6 +1,8 @@
 import re
 import sqli
+import gal
 import subprocess
+import html.parser
 from base import *
 from globals import *
 from keywords import check_if_exist, if_any_autoreply
@@ -9,12 +11,13 @@ from keywords import check_if_exist, if_any_autoreply
 @bot.register(public=True)
 def forever_ban(cxt):
     if cxt['user_id'] in forever_ban_list:
-        bot.delete_msg(message_id=cxt['message_id'])
+        # bot.delete_msg(message_id=cxt['message_id'])
         bot.send_private_msg(
             user_id=cxt['user_id'], message=prompts['forever_ban_private'])
         return dict(
             reply=prompts['black_house'], ban=True, ban_duration=43200)
         # 一旦发言，撤回并重新禁言 30 天
+        # 酷 Q Air 不支持撤回…
 
 
 @bot.register(public=True)
@@ -25,11 +28,39 @@ def keyword_ban(cxt):
         for key in do_ban_keys:
             reply = check_if_exist(key, cxt['message_no_CQ'])
             if reply:
+<<<<<<< HEAD
                 duration = 60 * 60 * 24 * 2 if key == 'dirty' \
                     else prohibited_duration * 60
                 # 脏话直接禁两天
+=======
+                if key == 'dirty':
+                    duration = 60 * 60 * 24 * 2  # 2d
+                elif key == 'violation':
+                    duration = 60 * 60 * 6  # 6h
+                else:
+                    duration = prohibited_duration * 60
+>>>>>>> upstream/master
                 return dict(
                     reply=reply, ban=True, ban_duration=duration)
+
+
+@bot.register(public=True)
+def ban_if_code(cxt):
+    keys = [
+        '#include', 'main(', 'printf(', 'std::', 'In file included from', 'required from',
+        'return', 'for', 'while'
+    ]
+    if len(cxt['message']) > 150 and cxt['user_id'] not in whitelist:
+        for i in keys:
+            if i in cxt['message']:
+                # bot.delete_msg(message_id=cxt['message_id'])
+                return dict(reply=prompts['code_too_long'], ban=True, ban_duration=60)
+
+
+@bot.register(public=True)
+def ban_if_too_long(cxt):
+    if len(cxt['message']) > 1000 and cxt['user_id'] not in whitelist:
+        return dict(reply=prompts['msg_too_long'], ban=True, ban_duration=120)
 
 
 @bot.register(public=True)
@@ -206,6 +237,39 @@ def cmd_printf(cxt):
         return dict(reply=prompts['printf_crash'])
 
 
+@bot.register('shellcode', public=True, private=True)
+def cmd_shellcode(cxt):
+    groups = cxt['groups']
+    remains = cxt['message_no_CQ'][11:] or 'help'  # 截掉`%shellcode `
+    remains = html.parser.HTMLParser().unescape(remains)
+
+    # simple bypass
+    bypass = ['sh', 'cat', 'bin', 'tcp', 'nc']
+    for i in bypass:
+        if i in remains:
+            return 'violation occurred'
+    # ipv4
+    if re.match(r'(\d{1,3}\.){3}\d{1,3}', remains):
+        return 'violation occurred'
+    # 以上两个过滤都是保险起见
+
+    f = subprocess.Popen(
+        ['./playshellcode', str(cxt['user_id'])], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+    try:
+        ret = f.communicate(remains.encode('utf-8')[:0x30], timeout=2)[0].decode('utf-8')
+        print('ret:', ret)
+        assert ret
+        if not ret.endswith('\x66\x66\x66'):  # magic, 模仿 canary
+            return 'violation occurred'
+        ret = ret[:-3]
+
+        return dict(reply=ret, at_sender=False)
+
+    except (subprocess.TimeoutExpired, AssertionError):
+        return dict(reply=prompts['shellcode_crash'])
+
+
 @bot.register('bonus', public=True, private=True)
 @handle_exception
 def sqli_handle(cxt):
@@ -225,6 +289,20 @@ def sqli_handle(cxt):
         return dict(reply=prompts['bonus_help'])
     else:
         return sqli.getBonus(cxt['user_id'], groups[0])
+
+
+@bot.register('gal', public=True, private=True)
+def galstart_handle(cxt):
+    if not cxt.get('group_id') or cxt.get('group_id') == cli_args.gal:
+        return gal.startgame(cxt)
+    else:
+        return prompts['gal_not_here'].format(cli_args.gal)
+
+
+@bot.register(public=True, private=True)
+def galplay_handle(cxt):
+    if not cxt.get('group_id') or cxt.get('group_id') == cli_args.gal:
+        return gal.makechoice(cxt)
 
 
 @bot.register('help', public=True)
@@ -249,4 +327,5 @@ def cmd_debug_get_all_member(cxt):
 
 
 if __name__ == '__main__':
+    gal.scn_init()
     bot.run(host=cli_args.host, port=cli_args.port)

@@ -109,4 +109,5 @@ sqli.db
 superusers
 whitelist
 forever_ban_list
-config.py
+gal.json
+playshellcode
