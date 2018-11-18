@@ -19,8 +19,11 @@ bugs_fixer = 1196307933
 # 会把 traceback 私聊给这个 QQ 号
 active_groups = (818202693, 656594955, 683229251)
 # 启用的群号列表
+<<<<<<< HEAD
 private_ban_group = 10000
-
+=======
+private_ban_group = 656594955  # 818202693
 # 私聊 ban 的(默认)生效群号
 
 gal_group = 188097526
+>>>>>>> upstream/master
