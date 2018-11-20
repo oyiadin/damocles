@@ -271,13 +271,19 @@ def sqli_handle(cxt):
         return dict(reply=prompts['need_more_arguments'])
     groups.pop(0)
     if groups[0] == 'init':
-        sqli.init()
+        return sqli.init(cxt['user_id'])
     elif groups[0] == 'create':
-        if not groups[1].isdigit():
-            return dict(reply=prompts['must_digits'])
-        return sqli.createActivationCode(int(groups[1]))
+        if cxt['user_id'] in whitelist:
+            if not groups[1].isdigit():
+                return dict(reply=prompts['must_digits'])
+            return sqli.createActivationCode(int(groups[1]))
+        else:
+            return dict(reply=prompts['permission_needed'])
     elif groups[0] == 'show':
-        return sqli.getActivationCode()
+        if cxt['user_id'] in whitelist:
+            return sqli.getActivationCode()
+        else:
+            return dict(reply=prompts['permission_needed'])
     elif groups[0] == 'help':
         return dict(reply=prompts['bonus_help'])
     else:
